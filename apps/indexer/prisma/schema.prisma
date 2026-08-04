@@ -1,0 +1,69 @@
+// Local dev/test uses SQLite (DATABASE_URL="file:./dev.db") so this schema is fully
+// runnable and testable without any external service. Every field type here is
+// Prisma-portable (no Postgres-only native annotations), so switching `provider`
+// to "postgresql" for production per the build plan is a one-line change.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Merchant {
+  wallet             String   @id
+  profileURI         String
+  passVerified       Boolean  @default(false)
+  active             Boolean  @default(true)
+  createdAt          DateTime
+  registeredAtBlock  String
+  payments           Payment[]
+  scoreHistory       ScoreHistory[]
+  insights           Insight[]
+}
+
+model Payment {
+  receiptId   String   @id
+  merchant    Merchant @relation(fields: [merchantWallet], references: [wallet])
+  merchantWallet String
+  payer       String
+  amount      String   // base units, stored as string to avoid float precision loss
+  invoiceRef  String
+  timestamp   DateTime
+  txHash      String
+  blockNumber String
+}
+
+model ScoreHistory {
+  id           Int      @id @default(autoincrement())
+  merchant     Merchant @relation(fields: [merchantWallet], references: [wallet])
+  merchantWallet String
+  score        Int
+  periodId     Int
+  computedAt   DateTime @default(now())
+  publishedOnChain Boolean @default(false)
+  publishTxHash    String?
+}
+
+model Insight {
+  id                          Int      @id @default(autoincrement())
+  merchant                    Merchant @relation(fields: [merchantWallet], references: [wallet])
+  merchantWallet              String
+  periodStart                 DateTime
+  scoreDelta                  Int
+  revenueChangePct            Float?
+  uniqueCustomersThisWeek     Int
+  uniqueCustomersTrailingAvg  Float
+  daysSinceTopCustomerLastPaid Int?
+  newCustomerCount            Int
+  repeatCustomerRate          Float
+  summarySentence             String
+  createdAt                   DateTime @default(now())
+}
+
+/// Singleton-per-key table tracking poller progress across restarts.
+model IndexerState {
+  key         String @id
+  lastBlock   String
+}

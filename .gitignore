@@ -1,0 +1,30 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Hardhat
+contracts/cache/
+contracts/artifacts/
+contracts/typechain-types/
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Prisma local SQLite dev DB
+apps/indexer/prisma/dev.db
+apps/indexer/prisma/dev.db-journal
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

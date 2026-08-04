@@ -1,0 +1,25 @@
+{
+  "name": "veriga",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Veriga — portable on-chain merchant trust built from real payment activity (QIE Mainnet Hackathon 3.0)",
+  "workspaces": [
+    "contracts",
+    "apps/web",
+    "apps/indexer",
+    "packages/shared"
+  ],
+  "scripts": {
+    "contracts:compile": "npm run compile --workspace=contracts",
+    "contracts:test": "npm run test --workspace=contracts"
+  },
+  "allowScripts": {
+    "@prisma/client@5.22.0": true,
+    "@prisma/engines@5.22.0": true,
+    "esbuild@0.28.1": true,
+    "esbuild@0.21.5": true,
+    "keccak@3.0.4": true,
+    "prisma@5.22.0": true,
+    "secp256k1@4.0.4": true
+  }
+}
