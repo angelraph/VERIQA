@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.1.0",
+    "@fontsource-variable/jetbrains-mono": "^5.1.0",
+    "@fontsource-variable/plus-jakarta-sans": "^5.1.0",
     "@tanstack/react-query": "^5.59.0",
     "@veriga/indexer": "*",
     "@veriga/shared": "*",
