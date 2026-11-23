@@ -12,8 +12,21 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "64kb" }));
 
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true });
+app.get("/api/health", async (req, res) => {
+  if (req.query.deep === undefined) {
+    res.json({ ok: true });
+    return;
+  }
+  try {
+    const { db } = await import("./db");
+    const { publicClient } = await import("./chainClient");
+    const [state, head] = await Promise.all([db.indexerState.findUnique({ where: { key: "lastBlock" } }), publicClient.getBlockNumber()]);
+    const last = state ? BigInt(state.lastBlock) : null;
+    const lag = last === null ? null : Number(head - last);
+    res.json({ ok: lag !== null && lag < 200, chainHead: head.toString(), indexedTo: last?.toString() ?? null, blocksBehind: lag });
+  } catch (e) {
+    res.status(503).json({ ok: false, error: (e as Error).message });
+  }
 });
 
 app.use("/api/merchants", merchantsRouter);

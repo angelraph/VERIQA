@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { decodeOffer, confirmSale, type SaleOffer } from "@/lib/relay";
-import { getOrCreateDeviceAccount } from "@/lib/deviceKey";
+import { getOrCreateDeviceAccount, getDeviceAccount } from "@/lib/deviceKey";
 import { fetchMerchant, decodeProfile } from "@/lib/api";
 import { formatUSD, formatLocal } from "@/lib/money";
 import { Button, Card, ErrorText, TxLink, Badge, Spinner } from "@/components/ui";
@@ -52,6 +52,11 @@ export default function ConfirmSalePage() {
 
   async function confirm() {
     setError(null);
+    const existing = getDeviceAccount();
+    if (existing && existing.address.toLowerCase() === offer!.merchant.toLowerCase()) {
+      setError(new Error("SelfSale"));
+      return;
+    }
     setState("sending");
     try {
       const customer = getOrCreateDeviceAccount();

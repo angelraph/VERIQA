@@ -129,7 +129,14 @@ relayRouter.post("/forward", async (req, res) => {
       functionName: "execute",
       args: [request],
     });
-    const hash = await client.writeContract(sim);
+    // QIE's eth_estimateGas undercounts calls that go through the forwarder,
+    // so the limit is set explicitly: the signed inner gas plus overhead.
+    const hash = await client.writeContract({ ...sim, gas: request.gas + 150_000n });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 60_000 });
+    if (receipt.status !== "success") {
+      res.status(422).json({ error: "The transaction reverted on-chain.", txHash: hash });
+      return;
+    }
     res.json({ txHash: hash, call: policy.functionName });
   } catch (err: any) {
     res.status(422).json({ error: err?.shortMessage ?? "call would revert" });
@@ -186,7 +193,12 @@ relayRouter.post("/sale", async (req, res) => {
         b.customerSignature as Hex,
       ],
     });
-    const hash = await client.writeContract(sim);
+    const hash = await client.writeContract({ ...sim, gas: 600_000n });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 60_000 });
+    if (receipt.status !== "success") {
+      res.status(422).json({ error: "The sale could not be recorded on-chain.", txHash: hash });
+      return;
+    }
     res.json({ txHash: hash });
   } catch (err: any) {
     res.status(422).json({ error: err?.shortMessage ?? "sale would revert" });

@@ -52,8 +52,9 @@ merchantsRouter.get("/", async (_req, res) => {
     byMerchant.set(p.merchantWallet, list);
   }
   const now = new Date();
+  const team = new Set((process.env.TEAM_WALLETS ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean));
   res.json({
-    merchants: merchants.map((m) => {
+    merchants: merchants.filter((m) => !team.has(m.wallet.toLowerCase())).map((m) => {
       const ps = byMerchant.get(m.wallet) ?? [];
       const mine = advances.filter((a) => a.merchantWallet === m.wallet);
       const inputs = deriveTrustScoreInputs(

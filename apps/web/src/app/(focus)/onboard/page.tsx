@@ -104,7 +104,7 @@ export default function OnboardPage() {
       <Card>
         <label className="block text-sm font-medium text-ink-700">
           Shop name
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="Mama Titi Provisions" className="input mt-1.5" />
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="Type your shop name" className="input mt-1.5" />
         </label>
         <label className="mt-4 block text-sm font-medium text-ink-700">
           What do you sell?
@@ -117,7 +117,7 @@ export default function OnboardPage() {
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm font-medium text-ink-700">
             City or market
-            <input value={city} onChange={(e) => setCity(e.target.value)} maxLength={40} placeholder="Balogun, Lagos" className="input mt-1.5" />
+            <input value={city} onChange={(e) => setCity(e.target.value)} maxLength={40} placeholder="For example, Balogun, Lagos" className="input mt-1.5" />
           </label>
           <label className="block text-sm font-medium text-ink-700">
             Your currency
@@ -134,7 +134,9 @@ export default function OnboardPage() {
           {busy ? "Registering on QIE" : "Open my shop"}
         </Button>
         <ErrorText error={error} />
-        <p className="mt-3 text-xs text-ink-400">Your shop name and city are public on QIE. Leave out personal details.</p>
+        <p className="mt-3 text-xs text-ink-400">
+          Your shop name and city are public on QIE. Leave out personal details. Once your shop is open, you type sale amounts on the Sell screen.
+        </p>
       </Card>
     </div>
   );

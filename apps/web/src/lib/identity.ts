@@ -37,12 +37,21 @@ export function useIdentity() {
     async (to: `0x${string}`, data: `0x${string}`, gas?: bigint): Promise<`0x${string}`> => {
       let hash: `0x${string}`;
       if (mode === "wallet" && walletClient) {
-        hash = await walletClient.sendTransaction({ to, data, account: walletClient.account, chain: walletClient.chain });
+        // QIE's gas estimates run low for some calls, so pad them generously.
+        let limit = 600_000n;
+        try {
+          const est = await publicClient!.estimateGas({ account: walletClient.account, to, data });
+          limit = est * 2n > limit ? est * 2n : limit;
+        } catch {
+          // keep the default limit; the wallet will show the real error if the call would fail
+        }
+        hash = await walletClient.sendTransaction({ to, data, account: walletClient.account, chain: walletClient.chain, gas: limit });
       } else {
         const acct = device ?? createDevice();
         ({ txHash: hash } = await relayCall(acct, to, data, gas));
       }
-      await publicClient?.waitForTransactionReceipt({ hash });
+      const receipt = await publicClient?.waitForTransactionReceipt({ hash });
+      if (receipt && receipt.status !== "success") throw new Error("The transaction reverted on QIE. Nothing was changed.");
       return hash;
     },
     [mode, walletClient, device, createDevice, publicClient]

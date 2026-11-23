@@ -195,6 +195,14 @@ export function friendlyError(msg: string): string {
     SwapAboveOracle: "The QIE price moved too far. Try again or pay in QUSDC.",
     "rate limited": "Too many requests in a short time. Wait a minute and try again.",
     "User rejected": "You cancelled the request in your wallet.",
+    "insufficient funds": "This wallet doesn't have enough QIE for the network fee. Add a little QIE, or use \"Use this phone\" and Veriga pays the fee.",
+    "relayer not configured": "Gas-free actions are switched off right now. Please try again shortly.",
+    "Failed to fetch": "Couldn't reach Veriga. Check your connection and try again.",
+    "reverted on-chain": "QIE rejected the transaction, and nothing was changed. Please try again.",
+    "signature, nonce or deadline invalid": "That request expired. Please try again.",
+    InvalidMerchantSignature: "This QR wasn't signed by the shop. Ask the seller for a new one.",
+    InvalidCustomerSignature: "Your confirmation couldn't be checked. Please scan the QR again.",
+    AmountTooLarge: "Cash sales are capped at $5,000 each.",
   };
   for (const [k, v] of Object.entries(map)) if (msg.includes(k)) return v;
   return msg.split("\n")[0].slice(0, 220);

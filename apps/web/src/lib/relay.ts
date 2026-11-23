@@ -4,21 +4,52 @@ import type { PrivateKeyAccount } from "viem/accounts";
 import { FORWARD_REQUEST_TYPES, SALE_TYPES, forwarderDomain, receiptsDomain } from "@veriga/shared";
 import { API_BASE, ADDR, CHAIN_ID } from "./config";
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/// POST with retries for the moments the backend is starting up (502/503/504)
+/// or the network drops before any answer arrives.
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
-  });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error ?? `Request failed (${res.status})`);
-  return json as T;
+  const payload = JSON.stringify(body, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const res = await fetch(`${API_BASE}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: payload });
+      if ([502, 503, 504].includes(res.status)) {
+        lastError = new Error("Veriga is waking up. One moment.");
+        await sleep(2500 * (attempt + 1));
+        continue;
+      }
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw Object.assign(new Error(json.error ?? `Request failed (${res.status})`), { final: true });
+      return json as T;
+    } catch (e) {
+      if ((e as { final?: boolean }).final) throw e;
+      lastError = new Error("Couldn't reach Veriga. Check your connection.");
+      await sleep(2000 * (attempt + 1));
+    }
+  }
+  throw lastError;
+}
+
+async function getJsonRetry<T>(url: string): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return (await res.json()) as T;
+      lastError = new Error(`Request failed (${res.status})`);
+    } catch (e) {
+      lastError = e;
+    }
+    await sleep(2000 * (attempt + 1));
+  }
+  throw lastError;
 }
 
 /// Signs an ERC-2771 forward request with the device key and asks the relayer
 /// to submit it. The contracts see the device key as the sender.
 export async function relayCall(account: PrivateKeyAccount, to: `0x${string}`, data: `0x${string}`, gas = 500_000n) {
-  const { nonce } = await fetch(`${API_BASE}/relay/nonce/${account.address}`).then((r) => r.json());
+  const { nonce } = await getJsonRetry<{ nonce: string }>(`${API_BASE}/relay/nonce/${account.address}`);
   const deadline = Math.floor(Date.now() / 1000) + 600;
   const message = { from: account.address, to, value: 0n, gas, nonce: BigInt(nonce), deadline, data };
   const signature = await account.signTypedData({

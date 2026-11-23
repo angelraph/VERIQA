@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { parseUnits } from "viem";
 import { useQuery } from "@tanstack/react-query";
+import { useReadContract } from "wagmi";
+import { paymentReceiptsAbi } from "@veriga/shared";
+import { ADDR } from "@/lib/config";
 import { AnimatePresence, motion } from "framer-motion";
 import { useShop, ShopGate } from "@/components/app/useShop";
 import { signSaleOffer, encodeOffer, type SaleOffer } from "@/lib/relay";
@@ -52,7 +55,19 @@ function Sell() {
     enabled: Boolean(offer && id.address),
     refetchInterval: 1_500,
   });
-  const confirmed = offer ? watch.data?.find((s) => s.invoiceRef.toLowerCase() === offer.saleRef.toLowerCase()) : undefined;
+  const indexed = offer ? watch.data?.find((s) => s.invoiceRef.toLowerCase() === offer.saleRef.toLowerCase()) : undefined;
+  const onChain = useReadContract({
+    address: ADDR.receipts,
+    abi: paymentReceiptsAbi,
+    functionName: "saleRefUsed",
+    args: offer && id.address ? [id.address, offer.saleRef] : undefined,
+    query: { enabled: Boolean(offer && id.address && !indexed), refetchInterval: 2_000 },
+  });
+  const confirmed =
+    indexed ??
+    (offer && onChain.data === true
+      ? { amountUSD: Number(offer.amount) / 1e6, txHash: "" as string }
+      : undefined);
 
   function reset() {
     setOffer(null);
@@ -131,7 +146,7 @@ function Sell() {
               <div className="mt-4 text-xl font-bold">Sale confirmed by your customer</div>
               <div className="mt-1 text-ink-500">{money.fmt(confirmed.amountUSD)}</div>
               <div className="mt-3 text-sm">
-                <TxLink hash={confirmed.txHash} label="Recorded on QIE" />
+                {confirmed.txHash ? <TxLink hash={confirmed.txHash} label="Recorded on QIE" /> : <span className="text-ink-500">Recorded on QIE</span>}
               </div>
               <Button
                 className="mt-6 w-full"
