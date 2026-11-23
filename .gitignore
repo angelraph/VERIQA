@@ -39,3 +39,6 @@ contracts/deployments/localFork.json
 
 # Generated for tests from schema.prisma
 apps/indexer/prisma/schema.sqlite.prisma
+
+# Local demo wallets (never commit)
+contracts/.demo-wallets.json

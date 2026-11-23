@@ -97,7 +97,7 @@ export default function PayPage({ params }: { params: { id: string } }) {
   function pay() {
     if (!merchantAddr) return;
     if (method === "qusdc") {
-      payTx.writeContract({ address: ADDR.receipts, abi: paymentReceiptsAbi, functionName: "payInvoice", args: [merchantAddr, units, invoiceRef], gas: 500_000n });
+      payTx.writeContract({ address: ADDR.receipts, abi: paymentReceiptsAbi, functionName: "payInvoice", args: [merchantAddr, units, invoiceRef], gas: 900_000n });
     } else if (qieValue) {
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 600);
       payTx.writeContract({
@@ -106,7 +106,7 @@ export default function PayPage({ params }: { params: { id: string } }) {
         functionName: "payWithQIE",
         args: [merchantAddr, units, invoiceRef, deadline],
         value: qieValue,
-        gas: 700_000n,
+        gas: 1_100_000n,
       });
     }
   }
