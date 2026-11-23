@@ -14,7 +14,7 @@
 ## Live
 
 - App: https://veriga-sigma.vercel.app
-- API: https://veriga-api.fly.dev/api/health
+- API: https://veriga-sigma.vercel.app/api/health (runs inside the site, data in Neon Postgres)
 - Contracts on QIE mainnet (chain 1990), all source-verified:
 
 | Contract | Address |
