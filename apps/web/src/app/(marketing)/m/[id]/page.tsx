@@ -154,7 +154,7 @@ export default function MerchantProfilePage({ params }: { params: { id: string }
                   </div>
                   <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-ink-500">
                     <span>
-                      {formatUSD(total - a.outstandingUSD)} of {formatUSD(total)} repaid, {a.repayments.filter((r) => r.automatic).length} automatic payments from sales
+                      {formatUSD(total - a.outstandingUSD)} of {formatUSD(total)} repaid, {a.repayments.filter((r) => r.automatic).length} automatic {a.repayments.filter((r) => r.automatic).length === 1 ? "payment" : "payments"} from sales
                     </span>
                     <TxLink hash={a.txHash} label="Issued" />
                   </div>
