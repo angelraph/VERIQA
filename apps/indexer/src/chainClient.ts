@@ -1,6 +1,7 @@
 import { createPublicClient, createWalletClient, http, type Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { activeChain, contractAddresses } from "@veriga/shared";
+import { normalizePrivateKey } from "./keys";
 
 const rpcUrl = process.env.QIE_MAINNET_RPC || activeChain.rpcUrls.default.http[0];
 
@@ -12,11 +13,11 @@ export const publicClient = createPublicClient({
 /// Only constructed when UPDATER_PRIVATE_KEY is set, read paths (the poller,
 /// the API server) never need it. Only the score/volume publishing job does.
 export function getUpdaterWalletClient() {
-  const key = process.env.UPDATER_PRIVATE_KEY;
+  const key = normalizePrivateKey(process.env.UPDATER_PRIVATE_KEY);
   if (!key) {
     throw new Error("UPDATER_PRIVATE_KEY is not set, so no signing wallet client can be built a signing wallet client.");
   }
-  const account = privateKeyToAccount(key as `0x${string}`);
+  const account = privateKeyToAccount(key);
   return createWalletClient({
     account,
     chain: activeChain,

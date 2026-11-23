@@ -33,3 +33,6 @@ Thumbs.db
 contracts/deployments/localFork.json
 .claude/
 .vercel
+
+.vercel
+.env*

@@ -1,0 +1,19 @@
+# Veriga API, poller, relayer and score publisher, for Fly.io.
+FROM node:20-bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json packages/shared/
+COPY apps/indexer/package.json apps/indexer/
+RUN npm ci -w @veriga/indexer -w @veriga/shared --no-audit --no-fund
+
+COPY packages/shared packages/shared
+COPY apps/indexer apps/indexer
+RUN cd apps/indexer && npx prisma generate
+
+ENV NODE_ENV=production
+WORKDIR /app/apps/indexer
+EXPOSE 8080
+CMD ["sh", "-c", "npx prisma migrate deploy && npx tsx src/main.ts"]

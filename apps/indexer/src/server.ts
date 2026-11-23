@@ -23,6 +23,12 @@ app.use("/api/relay", relayRouter);
 app.use("/api/fx", fxRouter);
 app.use("/api/receipts", receiptsRouter);
 
+// Last line of defense: an unexpected error answers 500 instead of stopping the process.
+app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error("[api] unhandled error:", err);
+  if (!res.headersSent) res.status(500).json({ error: "Something went wrong." });
+});
+
 const port = Number(process.env.PORT ?? 4000);
 
 if (require.main === module) {

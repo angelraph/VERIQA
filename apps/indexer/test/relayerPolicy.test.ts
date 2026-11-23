@@ -46,3 +46,20 @@ describe("relayer policy", () => {
     expect(rl.take("A", 1500)).toBe(true);
   });
 });
+
+import { normalizePrivateKey } from "../src/keys";
+
+describe("normalizePrivateKey", () => {
+  const hex = "ab".repeat(32);
+  it("accepts keys with or without 0x, spaces or quotes", () => {
+    expect(normalizePrivateKey(hex)).toBe(`0x${hex}`);
+    expect(normalizePrivateKey(` 0x${hex} `)).toBe(`0x${hex}`);
+    expect(normalizePrivateKey(`"${hex}"`)).toBe(`0x${hex}`);
+  });
+  it("rejects anything that is not a 32-byte key", () => {
+    expect(normalizePrivateKey("")).toBeNull();
+    expect(normalizePrivateKey(undefined)).toBeNull();
+    expect(normalizePrivateKey("0x1234")).toBeNull();
+    expect(normalizePrivateKey("twelve seed phrase words")).toBeNull();
+  });
+});

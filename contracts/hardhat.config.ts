@@ -4,7 +4,8 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const DEPLOYER_KEY = process.env.DEPLOYER_PRIVATE_KEY;
+const rawKey = (process.env.DEPLOYER_PRIVATE_KEY ?? "").trim();
+const DEPLOYER_KEY = rawKey ? (rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`) : "";
 const accounts = DEPLOYER_KEY ? [DEPLOYER_KEY] : [];
 
 const config: HardhatUserConfig = {

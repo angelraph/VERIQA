@@ -1,0 +1,11 @@
+**/node_modules
+**/.next
+**/.env
+**/.env.*
+**/*.db
+**/*.db-journal
+contracts
+apps/web
+.git
+.claude
+.vercel

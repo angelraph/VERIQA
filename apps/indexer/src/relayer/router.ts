@@ -4,6 +4,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { activeChain, paymentReceiptsAbi, verigaForwarderAbi, contractAddresses } from "@veriga/shared";
 import { publicClient } from "../chainClient";
 import { checkForwardCall, RateLimiter, type Target } from "./policy";
+import { normalizePrivateKey } from "../keys";
 
 /// Gas relayer: merchants and customers sign with keys on their phones, and the
 /// relayer submits and pays the QIE gas. It can never act without their
@@ -16,10 +17,17 @@ const global = new RateLimiter(Number(process.env.RELAY_LIMIT_GLOBAL_DAY ?? 20_0
 
 const rpcUrl = process.env.QIE_MAINNET_RPC || activeChain.rpcUrls.default.http[0];
 
+let warned = false;
 function relayerClient() {
-  const key = process.env.RELAYER_PRIVATE_KEY;
-  if (!key) return null;
-  return createWalletClient({ account: privateKeyToAccount(key as Hex), chain: activeChain, transport: http(rpcUrl) });
+  const key = normalizePrivateKey(process.env.RELAYER_PRIVATE_KEY);
+  if (!key) {
+    if (process.env.RELAYER_PRIVATE_KEY && !warned) {
+      console.error("[relayer] RELAYER_PRIVATE_KEY is set but is not a valid private key, so relaying is off.");
+      warned = true;
+    }
+    return null;
+  }
+  return createWalletClient({ account: privateKeyToAccount(key), chain: activeChain, transport: http(rpcUrl) });
 }
 
 function addresses(): Record<Target, string> {
@@ -36,8 +44,12 @@ relayRouter.get("/status", async (_req, res) => {
     res.json({ enabled: false });
     return;
   }
-  const balance = await publicClient.getBalance({ address: client.account.address });
-  res.json({ enabled: true, relayer: client.account.address, balanceQIE: formatEther(balance), forwarder: contractAddresses.forwarder });
+  try {
+    const balance = await publicClient.getBalance({ address: client.account.address });
+    res.json({ enabled: true, relayer: client.account.address, balanceQIE: formatEther(balance), forwarder: contractAddresses.forwarder });
+  } catch {
+    res.json({ enabled: true, relayer: client.account.address, balanceQIE: null, forwarder: contractAddresses.forwarder });
+  }
 });
 
 relayRouter.get("/nonce/:address", async (req, res) => {
@@ -45,13 +57,17 @@ relayRouter.get("/nonce/:address", async (req, res) => {
     res.status(400).json({ error: "bad address or relayer not configured" });
     return;
   }
-  const nonce = await publicClient.readContract({
-    address: contractAddresses.forwarder,
-    abi: verigaForwarderAbi,
-    functionName: "nonces",
-    args: [getAddress(req.params.address)],
-  });
-  res.json({ nonce: nonce.toString() });
+  try {
+    const nonce = await publicClient.readContract({
+      address: contractAddresses.forwarder,
+      abi: verigaForwarderAbi,
+      functionName: "nonces",
+      args: [getAddress(req.params.address)],
+    });
+    res.json({ nonce: nonce.toString() });
+  } catch {
+    res.status(502).json({ error: "Could not reach QIE. Try again." });
+  }
 });
 
 interface ForwardBody {

@@ -10,7 +10,7 @@ async function main() {
   const args: Record<string, unknown[]> = { VerigaForwarder: [], ...d.constructorArgs };
   for (const [name, address] of Object.entries<string>(d.contracts)) {
     try {
-      await run("verify:verify", { address, constructorArguments: args[name] ?? [] });
+      await run("verify:verify", { address, constructorArguments: args[name] ?? [], contract: `contracts/${name}.sol:${name}` });
       console.log(`verified ${name} ${address}`);
     } catch (e: any) {
       console.log(`${name}: ${e.message?.split("\n")[0]}`);

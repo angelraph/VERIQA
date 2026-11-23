@@ -1,0 +1,35 @@
+# Veriga backend on Fly.io: API, chain poller, gas relayer and weekly score publisher.
+app = "veriga-api"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile.indexer"
+
+[env]
+  PORT = "8080"
+  DATABASE_URL = "file:/data/veriga.db"
+  QIE_MAINNET_RPC = "https://rpc1mainnet.qie.digital/"
+  POLL_INTERVAL_MS = "4000"
+
+[mounts]
+  source = "veriga_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # The poller has to keep following the chain, so the machine never sleeps.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/health"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

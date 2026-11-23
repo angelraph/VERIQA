@@ -11,6 +11,20 @@
 
 ---
 
+## Live
+
+- App: https://veriga-sigma.vercel.app
+- API: https://veriga-api.fly.dev/api/health
+- Contracts on QIE mainnet (chain 1990), all source-verified:
+
+| Contract | Address |
+|---|---|
+| MerchantRegistry | [0x6005A1e73A6cCd2759eC5bC9f74F80997393cc22](https://mainnet.qie.digital/address/0x6005A1e73A6cCd2759eC5bC9f74F80997393cc22) |
+| PaymentReceipts | [0x4e1A43B27F83532d1547C64b353Cb23CDd7A490E](https://mainnet.qie.digital/address/0x4e1A43B27F83532d1547C64b353Cb23CDd7A490E) |
+| WorkingCapitalPool | [0xbeb5d332a5C6dDeb117f3cC47fAb74F41f8A4ECA](https://mainnet.qie.digital/address/0xbeb5d332a5C6dDeb117f3cC47fAb74F41f8A4ECA) |
+| TrustScoreOracle | [0x857c34aCcD229E270b9790dfB6647D6a5fC9BE81](https://mainnet.qie.digital/address/0x857c34aCcD229E270b9790dfB6647D6a5fC9BE81) |
+| VerigaForwarder | [0x6F859A4FC901873a85b8691D25A941A3fe605DBF](https://mainnet.qie.digital/address/0x6F859A4FC901873a85b8691D25A941A3fe605DBF) |
+
 ## The problem
 
 Walk through any market and you'll find shops that have sold to the same customers for years. Ask one of them for a loan and the answer is usually no. The business is fine. The problem is that nobody can see it. Most of those sales are cash, written in a notebook if they're written at all, and banks can't read a notebook.
