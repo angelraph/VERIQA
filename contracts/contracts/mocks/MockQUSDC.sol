@@ -3,8 +3,8 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-/// @notice Test-only stand-in for QUSDC. Never deployed to testnet or mainnet , 
-/// used solely by the Hardhat test suite to exercise PaymentReceipts and
+/// @notice Test-only stand-in for QUSDC. Never deployed to testnet or mainnet.
+/// Used only by the Hardhat test suite to exercise PaymentReceipts and
 /// WorkingCapitalPool against a real ERC-20 implementation.
 contract MockQUSDC is ERC20 {
     constructor() ERC20("Mock QUSDC", "mQUSDC") {}

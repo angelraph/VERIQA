@@ -13,9 +13,9 @@ export const publicClient = createPublicClient({
 /// Only constructed when UPDATER_PRIVATE_KEY is set, read paths (the poller,
 /// the API server) never need it. Only the score/volume publishing job does.
 export function getUpdaterWalletClient() {
-  const key = normalizePrivateKey(process.env.UPDATER_PRIVATE_KEY);
+  const key = normalizePrivateKey(process.env.UPDATER_PRIVATE_KEY) ?? normalizePrivateKey(process.env.RELAYER_PRIVATE_KEY);
   if (!key) {
-    throw new Error("UPDATER_PRIVATE_KEY is not set, so no signing wallet client can be built a signing wallet client.");
+    throw new Error("No score publisher key is set (UPDATER_PRIVATE_KEY or RELAYER_PRIVATE_KEY).");
   }
   const account = privateKeyToAccount(key);
   return createWalletClient({

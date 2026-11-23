@@ -52,11 +52,11 @@ app.get("/api/cron/daily", async (req, res) => {
   try {
     out.sync = await syncNow();
     const { normalizePrivateKey } = await import("./keys");
-    if (normalizePrivateKey(process.env.UPDATER_PRIVATE_KEY)) {
+    if (normalizePrivateKey(process.env.UPDATER_PRIVATE_KEY) ?? normalizePrivateKey(process.env.RELAYER_PRIVATE_KEY)) {
       const { publishScores } = await import("./publisher");
       out.scores = await publishScores();
     } else {
-      out.scores = "skipped, no UPDATER_PRIVATE_KEY";
+      out.scores = "skipped, no publisher key";
     }
     res.json({ ok: true, ...out });
   } catch (e) {

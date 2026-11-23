@@ -38,6 +38,7 @@ export async function publishScores(now = new Date()): Promise<{ published: numb
       abi: trustScoreOracleAbi,
       functionName: "publishScore",
       args: [merchant as `0x${string}`, BigInt(latest.score), period, (latest.inputsHash || `0x${"0".repeat(64)}`) as `0x${string}`],
+      gas: 200_000n,
     });
     await publicClient.waitForTransactionReceipt({ hash });
     await db.scoreHistory.update({ where: { id: latest.id }, data: { publishedOnChain: true, publishTxHash: hash } });
