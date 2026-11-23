@@ -6,7 +6,10 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.ts --network qieMainnet",
-    "deploy:testnet": "hardhat run scripts/deploy.ts --network qieTestnet"
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network qieTestnet",
+    "test:fork": "hardhat test test/fork.mainnet.test.ts",
+    "export-abis": "node scripts/export-abis.mjs",
+    "verify": "hardhat run scripts/verify.ts --network qieMainnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

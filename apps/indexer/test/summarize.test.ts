@@ -23,7 +23,7 @@ describe("generateSummary", () => {
     expect(result.sentence).toBe(generateTemplateSummary(stats).join(" "));
   });
 
-  it("never calls fetch when no API key is set — the product works with the LLM path fully disabled", async () => {
+  it("never calls fetch when no API key is set, the product works with the LLM path fully disabled", async () => {
     const fetchImpl = vi.fn();
     await generateSummary(stats, { openaiApiKey: undefined, fetchImpl });
     expect(fetchImpl).not.toHaveBeenCalled();

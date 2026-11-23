@@ -2,6 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-slate-950 text-slate-100;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-canvas font-sans text-ink-900 antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    @apply bg-violet-200 text-ink-900;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-violet-500 ring-offset-2 ring-offset-canvas;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+  .text-gradient {
+    @apply bg-brand bg-clip-text text-transparent;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-violet-600;
+  }
+  .surface {
+    @apply rounded-2xl border border-ink-200/70 bg-white shadow-card;
+  }
+  .input {
+    @apply w-full rounded-xl border border-ink-200 bg-white px-3.5 py-3 text-ink-900 placeholder:text-ink-400 transition focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-100;
+  }
+  .link {
+    @apply font-medium text-violet-700 underline-offset-4 hover:underline;
+  }
+  .skeleton {
+    @apply animate-shimmer rounded-md bg-[linear-gradient(90deg,#efedf8_25%,#f7f6fc_50%,#efedf8_75%)] bg-[length:200%_100%];
+  }
+  .prose-veriga h2 {
+    @apply mt-10 font-display text-2xl font-semibold text-ink-900;
+  }
+  .prose-veriga h3 {
+    @apply mt-6 font-display text-lg font-semibold text-ink-900;
+  }
+  .prose-veriga p,
+  .prose-veriga li {
+    @apply mt-3 leading-7 text-ink-600;
+  }
+  .prose-veriga ul {
+    @apply mt-3 list-disc space-y-1 pl-5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

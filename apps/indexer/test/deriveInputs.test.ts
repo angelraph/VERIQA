@@ -1,63 +1,100 @@
 import { describe, it, expect } from "vitest";
-import { deriveTrustScoreInputs, type RawPayment } from "../src/trust/deriveInputs";
+import {
+  deriveTrustScoreInputs,
+  hashScoreInputs,
+  canonicalInputs,
+  ATTESTED_MAX_SALES_PER_CUSTOMER_PER_WEEK,
+  ATTESTED_MAX_USD_PER_SALE,
+  type MerchantFacts,
+} from "../src/trust/deriveInputs";
 
-const QUSDC = (n: number) => (BigInt(n) * 10n ** 6n).toString();
+const NOW = new Date("2026-11-23T12:00:00Z");
+const FACTS: MerchantFacts = {
+  createdAt: new Date("2026-10-01T00:00:00Z"),
+  passVerified: false,
+  hasQieName: true,
+  advancesRepaid: 1,
+  defaults: 0,
+};
+const usd = (n: number) => String(Math.round(n * 1e6));
+const at = (daysAgo: number) => new Date(NOW.getTime() - daysAgo * 86_400_000);
 
 describe("deriveTrustScoreInputs", () => {
-  const registeredAt = new Date("2026-01-01T00:00:00Z");
-  const now = new Date("2026-03-02T00:00:00Z"); // 60 days later
-
-  it("returns all-zero inputs for a merchant with no payments", () => {
-    const result = deriveTrustScoreInputs([], registeredAt, now);
-    expect(result.txCount).toBe(0);
-    expect(result.totalVolumeUSD).toBe(0);
-    expect(result.repeatCustomerRate).toBe(0);
-    expect(result.activeWeeksInLast12).toBe(0);
-    expect(result.daysSinceRegistration).toBe(60);
+  it("separates settled and attested evidence", () => {
+    const i = deriveTrustScoreInputs(
+      [
+        { payer: "0xA", amount: usd(50), timestamp: at(1), tier: 0 },
+        { payer: "0xB", amount: usd(20), timestamp: at(2), tier: 1 },
+      ],
+      FACTS,
+      NOW
+    );
+    expect(i.settledTxCount).toBe(1);
+    expect(i.settledVolumeUSD).toBe(50);
+    expect(i.attestedTxCount).toBe(1);
+    expect(i.attestedVolumeUSD).toBe(20);
+    expect(i.distinctCustomers).toBe(2);
+    expect(i.hasQieName).toBe(true);
+    expect(i.advancesRepaid).toBe(1);
+    expect(i.daysSinceRegistration).toBe(53);
   });
 
-  it("converts base units (6 decimals) to USD correctly", () => {
-    const payments: RawPayment[] = [{ payer: "0xA", amount: QUSDC(50), timestamp: now }];
-    const result = deriveTrustScoreInputs(payments, registeredAt, now);
-    expect(result.totalVolumeUSD).toBe(50);
-    expect(result.txCount).toBe(1);
-  });
-
-  it("computes repeat-customer rate from distinct payer wallets, not raw tx count", () => {
-    const payments: RawPayment[] = [
-      { payer: "0xA", amount: QUSDC(10), timestamp: now },
-      { payer: "0xA", amount: QUSDC(10), timestamp: now },
-      { payer: "0xB", amount: QUSDC(10), timestamp: now },
-    ];
-    const result = deriveTrustScoreInputs(payments, registeredAt, now);
-    // 2 distinct payers, 1 of them (0xA) paid >= 2 times -> 1/2
-    expect(result.repeatCustomerRate).toBe(0.5);
-    expect(result.txCount).toBe(3);
-  });
-
-  it("counts distinct active weeks only within the trailing 12 weeks", () => {
-    const oldPayment: RawPayment = {
-      payer: "0xA",
-      amount: QUSDC(1),
-      timestamp: new Date("2025-01-01T00:00:00Z"), // more than a year before `now`
-    };
-    const recentPayment: RawPayment = { payer: "0xB", amount: QUSDC(1), timestamp: now };
-    const result = deriveTrustScoreInputs([oldPayment, recentPayment], registeredAt, now);
-    expect(result.activeWeeksInLast12).toBe(1);
-  });
-
-  it("never reports more than 12 active weeks even with more distinct weeks of data", () => {
-    const payments: RawPayment[] = Array.from({ length: 20 }, (_, i) => ({
-      payer: `0xUser${i}`,
-      amount: QUSDC(1),
-      timestamp: new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000),
+  it("caps attested sales per customer per week and per-sale amount", () => {
+    const sameWeek = Array.from({ length: 10 }, (_, k) => ({
+      payer: "0xFake",
+      amount: usd(1000),
+      timestamp: new Date(NOW.getTime() - k * 60_000),
+      tier: 1,
     }));
-    const result = deriveTrustScoreInputs(payments, registeredAt, now);
-    expect(result.activeWeeksInLast12).toBeLessThanOrEqual(12);
+    const i = deriveTrustScoreInputs(sameWeek, FACTS, NOW);
+    expect(i.attestedTxCount).toBe(ATTESTED_MAX_SALES_PER_CUSTOMER_PER_WEEK);
+    expect(i.attestedVolumeUSD).toBe(ATTESTED_MAX_SALES_PER_CUSTOMER_PER_WEEK * ATTESTED_MAX_USD_PER_SALE);
   });
 
-  it("always reports refundRate 0 (no refund mechanism built yet)", () => {
-    const result = deriveTrustScoreInputs([], registeredAt, now);
-    expect(result.refundRate).toBe(0);
+  it("treats payer addresses case-insensitively", () => {
+    const i = deriveTrustScoreInputs(
+      [
+        { payer: "0xabc", amount: usd(1), timestamp: at(1), tier: 0 },
+        { payer: "0xABC", amount: usd(1), timestamp: at(2), tier: 0 },
+      ],
+      FACTS,
+      NOW
+    );
+    expect(i.distinctCustomers).toBe(1);
+    expect(i.repeatCustomerRate).toBe(1);
+  });
+
+  it("measures top payer share of settled volume", () => {
+    const i = deriveTrustScoreInputs(
+      [
+        { payer: "0xA", amount: usd(90), timestamp: at(1), tier: 0 },
+        { payer: "0xB", amount: usd(10), timestamp: at(1), tier: 0 },
+        { payer: "0xC", amount: usd(500), timestamp: at(1), tier: 1 },
+      ],
+      FACTS,
+      NOW
+    );
+    expect(i.topPayerShare).toBe(0.9);
+  });
+
+  it("counts active weeks only within the trailing 12 weeks", () => {
+    const i = deriveTrustScoreInputs(
+      [
+        { payer: "0xA", amount: usd(1), timestamp: at(1), tier: 0 },
+        { payer: "0xA", amount: usd(1), timestamp: at(8), tier: 1 },
+        { payer: "0xA", amount: usd(1), timestamp: at(200), tier: 0 },
+      ],
+      FACTS,
+      NOW
+    );
+    expect(i.activeWeeksInLast12).toBe(2);
+  });
+
+  it("hashes canonically: same inputs, same hash, regardless of key order", () => {
+    const i = deriveTrustScoreInputs([{ payer: "0xA", amount: usd(5), timestamp: at(1), tier: 0 }], FACTS, NOW);
+    const shuffled = Object.fromEntries(Object.entries(i).reverse()) as typeof i;
+    expect(hashScoreInputs(shuffled)).toBe(hashScoreInputs(i));
+    expect(canonicalInputs(i).startsWith('{"version":"veriga-trust-v2"')).toBe(true);
+    expect(hashScoreInputs({ ...i, settledTxCount: 2 })).not.toBe(hashScoreInputs(i));
   });
 });

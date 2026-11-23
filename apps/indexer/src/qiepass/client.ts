@@ -1,7 +1,7 @@
 import { signRequest } from "./auth";
 
 /// Client for the confirmed QIE Pass partner API (qiepass.qie.digital/integration-docs).
-/// Only Option 1 (identifier — user already has a QIE Wallet) is used here: a
+/// Only Option 1 (identifier, user already has a QIE Wallet) is used here: a
 /// merchant already interacting on-chain necessarily has a wallet, so Option 2
 /// (partnerUserRef web-onboarding for brand-new users) does not apply to this flow.
 

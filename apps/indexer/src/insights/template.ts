@@ -7,7 +7,7 @@ function round(value: number, decimals = 1): number {
   return Math.round(value * factor) / factor;
 }
 
-/// Deterministic, template-only summary — the product must be fully demoable
+/// Deterministic, template-only summary, the product must be fully demoable
 /// with this alone (no LLM call at all). See summarize.ts for the optional
 /// cosmetic phrasing layer built strictly on top of these same sentences.
 export function generateTemplateSummary(stats: WeeklyStats): string[] {
@@ -46,7 +46,7 @@ export function generateTemplateSummary(stats: WeeklyStats): string[] {
   sentences.push(customerSentence);
 
   if (stats.daysSinceTopCustomerLastPaid !== null && stats.daysSinceTopCustomerLastPaid >= ATTENTION_THRESHOLD_DAYS) {
-    sentences.push(`Your top customer hasn't returned in ${stats.daysSinceTopCustomerLastPaid} days — worth a check-in.`);
+    sentences.push(`Your top customer hasn't returned in ${stats.daysSinceTopCustomerLastPaid} days. Worth a check-in.`);
   }
 
   return sentences;

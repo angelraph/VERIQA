@@ -12,7 +12,7 @@ export interface WeeklyStats {
   currentScore: number;
   revenueThisWeek: number;
   revenueLastWeek: number;
-  /** null when last week's revenue was 0 — a percentage change is undefined, not infinite/0 */
+  /** null when last week's revenue was 0, a percentage change is undefined, not infinite/0 */
   revenueChangePct: number | null;
   uniqueCustomersThisWeek: number;
   uniqueCustomersTrailingAvg: number;
@@ -35,7 +35,7 @@ function distinctPayers(payments: InsightPayment[]): Set<string> {
 }
 
 /// All computation here is deterministic SQL/JS-style aggregation over already
-/// indexed payment history — no LLM involvement. This is the "based on:" data
+/// indexed payment history, no LLM involvement. This is the "based on:" data
 /// the dashboard shows, and the only input the optional LLM phrasing layer
 /// (summarize.ts) is ever allowed to see.
 export function computeWeeklyStats(input: ComputeWeeklyStatsInput): WeeklyStats {

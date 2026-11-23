@@ -13,11 +13,11 @@ export interface GenerateSummaryOptions {
 
 /**
  * Turns already-computed weekly stats into plain English. The LLM call, when
- * enabled, receives ONLY the structured stats object below as JSON — no tool
+ * enabled, receives ONLY the structured stats object below as JSON, no tool
  * use, no function calling, no wallet/signer access, no memory across runs.
  * Ship template-only: this function must behave correctly with no API key set
  * (the default), which is the concrete defense against a "thin AI wrapper"
- * reading — the product is fully demoable with the LLM path disabled.
+ * reading, the product is fully demoable with the LLM path disabled.
  */
 export async function generateSummary(stats: WeeklyStats, options: GenerateSummaryOptions = {}): Promise<SummaryResult> {
   const templateSentence = generateTemplateSummary(stats).join(" ");
@@ -43,7 +43,7 @@ export async function generateSummary(stats: WeeklyStats, options: GenerateSumma
             role: "system",
             content:
               "Rewrite the given business stats as 2-4 short, plain-English sentences for a small-business dashboard. " +
-              "Only use the numbers provided — do not invent facts, advice, or numbers not present in the input.",
+              "Only use the numbers provided. Do not invent facts, advice, or numbers not present in the input.",
           },
           { role: "user", content: JSON.stringify(stats) },
         ],
@@ -61,7 +61,7 @@ export async function generateSummary(stats: WeeklyStats, options: GenerateSumma
     }
     return { sentence: text, source: "llm" };
   } catch {
-    // Network error, timeout, malformed response — always fall back cleanly.
+    // Network error, timeout, malformed response, always fall back cleanly.
     return { sentence: templateSentence, source: "template" };
   }
 }

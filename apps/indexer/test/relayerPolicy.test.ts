@@ -1,0 +1,48 @@
+import { describe, it, expect } from "vitest";
+import { encodeFunctionData, parseAbi } from "viem";
+import { merchantRegistryAbi, workingCapitalPoolAbi } from "@veriga/shared";
+import { checkForwardCall, RateLimiter, MAX_FORWARD_GAS } from "../src/relayer/policy";
+
+const addrs = {
+  merchantRegistry: "0x1000000000000000000000000000000000000001",
+  paymentReceipts: "0x1000000000000000000000000000000000000002",
+  workingCapitalPool: "0x1000000000000000000000000000000000000003",
+};
+
+describe("relayer policy", () => {
+  it("sponsors allowed merchant calls", () => {
+    const data = encodeFunctionData({ abi: merchantRegistryAbi, functionName: "registerMerchant", args: ["ipfs://x"] });
+    expect(checkForwardCall(addrs.merchantRegistry, data, 0n, 300_000n, addrs)).toEqual({
+      ok: true,
+      target: "merchantRegistry",
+      functionName: "registerMerchant",
+    });
+  });
+
+  it("refuses admin functions, unknown targets, value and excessive gas", () => {
+    const grant = encodeFunctionData({
+      abi: workingCapitalPoolAbi,
+      functionName: "withdrawLiquidity",
+      args: [1n],
+    });
+    expect(checkForwardCall(addrs.workingCapitalPool, grant, 0n, 100_000n, addrs)).toMatchObject({ ok: false });
+    const data = encodeFunctionData({ abi: merchantRegistryAbi, functionName: "linkQieName" });
+    expect(checkForwardCall("0x2000000000000000000000000000000000000000", data, 0n, 100_000n, addrs)).toMatchObject({
+      ok: false,
+      reason: "target not allowed",
+    });
+    expect(checkForwardCall(addrs.merchantRegistry, data, 1n, 100_000n, addrs)).toMatchObject({ ok: false });
+    expect(checkForwardCall(addrs.merchantRegistry, data, 0n, MAX_FORWARD_GAS + 1n, addrs)).toMatchObject({ ok: false });
+    const junk = encodeFunctionData({ abi: parseAbi(["function evil()"]), functionName: "evil" });
+    expect(checkForwardCall(addrs.merchantRegistry, junk, 0n, 100_000n, addrs)).toMatchObject({ ok: false });
+  });
+
+  it("rate limits per key within a sliding window", () => {
+    const rl = new RateLimiter(2, 1000);
+    expect(rl.take("A", 0)).toBe(true);
+    expect(rl.take("a", 10)).toBe(true);
+    expect(rl.take("A", 20)).toBe(false);
+    expect(rl.take("B", 20)).toBe(true);
+    expect(rl.take("A", 1500)).toBe(true);
+  });
+});

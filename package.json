@@ -2,7 +2,7 @@
   "name": "veriga",
   "private": true,
   "version": "0.1.0",
-  "description": "Veriga — portable on-chain merchant trust built from real payment activity (QIE Mainnet Hackathon 3.0)",
+  "description": "Veriga: customer-confirmed sales records and self-repaying working capital for small merchants, built on QIE",
   "workspaces": [
     "contracts",
     "apps/web",

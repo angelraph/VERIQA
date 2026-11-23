@@ -6,3 +6,5 @@ export * from "./abi/paymentReceipts";
 export * from "./abi/trustScoreOracle";
 export * from "./abi/workingCapitalPool";
 export * from "./abi/erc20";
+export * from "./abi/verigaForwarder";
+export * from "./qie";

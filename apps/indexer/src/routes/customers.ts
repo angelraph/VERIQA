@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { getAddress, isAddress } from "viem";
 import { db } from "../db";
 import { QUSDC_DECIMALS } from "@veriga/shared";
 
@@ -11,11 +12,15 @@ function baseUnitsToUSD(amountBaseUnits: string): number {
 /// Portable receipts/loyalty view: every payment a customer has made across
 /// ANY merchant on the network, not siloed per-storefront.
 customersRouter.get("/:wallet/receipts", async (req, res) => {
-  const wallet = req.params.wallet;
+  if (!isAddress(req.params.wallet, { strict: false })) {
+    res.status(400).json({ error: "bad address" });
+    return;
+  }
+  const wallet = getAddress(req.params.wallet);
   const payments = await db.payment.findMany({
     where: { payer: wallet },
     orderBy: { timestamp: "desc" },
-    include: { merchant: { select: { profileURI: true, passVerified: true } } },
+    include: { merchant: { select: { profileURI: true, passVerified: true, qieName: true } } },
   });
 
   res.json({
@@ -24,6 +29,9 @@ customersRouter.get("/:wallet/receipts", async (req, res) => {
       merchant: p.merchantWallet,
       merchantProfileURI: p.merchant.profileURI,
       merchantPassVerified: p.merchant.passVerified,
+      merchantQieName: p.merchant.qieName,
+      tier: p.tier === 0 ? "settled" : "attested",
+      method: ["qusdc", "qie", "cash"][p.method] ?? "qusdc",
       amountUSD: baseUnitsToUSD(p.amount),
       invoiceRef: p.invoiceRef,
       timestamp: p.timestamp,

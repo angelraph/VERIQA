@@ -1,90 +1,79 @@
 import { describe, it, expect } from "vitest";
-import { computeTrustScore, MAX_SCORE } from "../src/trust/score";
+import { computeTrustScore, MAX_SCORE, type TrustScoreInputs } from "../src/trust/score";
 
-describe("computeTrustScore", () => {
-  it("returns 0 for a brand new merchant with no activity", () => {
-    const result = computeTrustScore({
-      txCount: 0,
-      totalVolumeUSD: 0,
-      repeatCustomerRate: 0,
-      daysSinceRegistration: 0,
-      activeWeeksInLast12: 0,
-      refundRate: 0,
-    });
-    expect(result.score).toBe(0);
+const ZERO: TrustScoreInputs = {
+  settledTxCount: 0,
+  settledVolumeUSD: 0,
+  attestedTxCount: 0,
+  attestedVolumeUSD: 0,
+  distinctCustomers: 0,
+  repeatCustomerRate: 0,
+  activeWeeksInLast12: 0,
+  daysSinceRegistration: 0,
+  passVerified: false,
+  hasQieName: false,
+  advancesRepaid: 0,
+  defaults: 0,
+  topPayerShare: 0,
+};
+
+const STRONG: TrustScoreInputs = {
+  settledTxCount: 200,
+  settledVolumeUSD: 50_000,
+  attestedTxCount: 300,
+  attestedVolumeUSD: 20_000,
+  distinctCustomers: 150,
+  repeatCustomerRate: 1,
+  activeWeeksInLast12: 12,
+  daysSinceRegistration: 365,
+  passVerified: true,
+  hasQieName: true,
+  advancesRepaid: 5,
+  defaults: 0,
+  topPayerShare: 0.05,
+};
+
+describe("computeTrustScore v2", () => {
+  it("is 0 for a brand-new merchant", () => {
+    expect(computeTrustScore(ZERO).score).toBe(0);
   });
 
-  it("never exceeds MAX_SCORE even with extreme inputs", () => {
-    const result = computeTrustScore({
-      txCount: 1_000_000,
-      totalVolumeUSD: 10_000_000,
-      repeatCustomerRate: 1,
-      daysSinceRegistration: 100_000,
-      activeWeeksInLast12: 12,
-      refundRate: 0,
-    });
-    expect(result.score).toBeLessThanOrEqual(MAX_SCORE);
-    expect(result.score).toBe(MAX_SCORE);
+  it("reaches MAX_SCORE at every cap", () => {
+    expect(computeTrustScore(STRONG).score).toBe(MAX_SCORE);
   });
 
-  it("never goes negative even with a maxed-out refund penalty and no other activity", () => {
-    const result = computeTrustScore({
-      txCount: 0,
-      totalVolumeUSD: 0,
-      repeatCustomerRate: 0,
-      daysSinceRegistration: 0,
-      activeWeeksInLast12: 0,
-      refundRate: 1,
-    });
-    expect(result.score).toBe(0);
+  it("weights settled evidence above the same amount of attested evidence", () => {
+    const settled = computeTrustScore({ ...ZERO, settledTxCount: 40, settledVolumeUSD: 2_000 });
+    const attested = computeTrustScore({ ...ZERO, attestedTxCount: 40, attestedVolumeUSD: 2_000 });
+    expect(settled.score).toBeGreaterThan(attested.score);
+    expect(attested.score).toBeGreaterThan(0);
   });
 
-  it("is monotonically non-decreasing in txCount, all else equal", () => {
-    const base = { totalVolumeUSD: 100, repeatCustomerRate: 0.2, daysSinceRegistration: 30, activeWeeksInLast12: 2, refundRate: 0 };
-    const low = computeTrustScore({ ...base, txCount: 5 });
-    const high = computeTrustScore({ ...base, txCount: 50 });
-    expect(high.score).toBeGreaterThan(low.score);
+  it("only rewards repeat rate once there are several customers", () => {
+    const one = computeTrustScore({ ...ZERO, distinctCustomers: 1, repeatCustomerRate: 1 });
+    const five = computeTrustScore({ ...ZERO, distinctCustomers: 5, repeatCustomerRate: 1 });
+    expect(one.repeatComponent).toBeCloseTo(30);
+    expect(five.repeatComponent).toBeCloseTo(150);
   });
 
-  it("is monotonically non-decreasing in totalVolumeUSD, all else equal", () => {
-    const base = { txCount: 10, repeatCustomerRate: 0.2, daysSinceRegistration: 30, activeWeeksInLast12: 2, refundRate: 0 };
-    const low = computeTrustScore({ ...base, totalVolumeUSD: 100 });
-    const high = computeTrustScore({ ...base, totalVolumeUSD: 5000 });
-    expect(high.score).toBeGreaterThan(low.score);
+  it("penalizes one payer supplying most of the settled volume", () => {
+    const spread = computeTrustScore({ ...STRONG, topPayerShare: 0.1 });
+    const concentrated = computeTrustScore({ ...STRONG, topPayerShare: 1 });
+    expect(concentrated.concentrationPenalty).toBeCloseTo(100);
+    expect(spread.concentrationPenalty).toBe(0);
+    expect(concentrated.score).toBeLessThan(spread.score);
   });
 
-  it("rewards repeat customers over one-off customers at equal volume/tx count", () => {
-    const base = { txCount: 20, totalVolumeUSD: 1000, daysSinceRegistration: 60, activeWeeksInLast12: 4, refundRate: 0 };
-    const noRepeat = computeTrustScore({ ...base, repeatCustomerRate: 0 });
-    const allRepeat = computeTrustScore({ ...base, repeatCustomerRate: 1 });
-    expect(allRepeat.score).toBeGreaterThan(noRepeat.score);
-    expect(allRepeat.score - noRepeat.score).toBe(250);
+  it("penalizes defaults heavily and caps the penalty", () => {
+    expect(computeTrustScore({ ...STRONG, defaults: 1 }).score).toBe(800);
+    expect(computeTrustScore({ ...STRONG, defaults: 5 }).defaultPenalty).toBe(400);
   });
 
-  it("a refund penalty strictly reduces the score relative to an identical merchant with no refunds", () => {
-    const base = { txCount: 20, totalVolumeUSD: 1000, repeatCustomerRate: 0.3, daysSinceRegistration: 60, activeWeeksInLast12: 4 };
-    const clean = computeTrustScore({ ...base, refundRate: 0 });
-    const withRefunds = computeTrustScore({ ...base, refundRate: 0.5 });
-    expect(withRefunds.score).toBeLessThan(clean.score);
+  it("adds identity points for QIE Pass and a .qie name", () => {
+    expect(computeTrustScore({ ...ZERO, passVerified: true, hasQieName: true }).identityComponent).toBe(50);
   });
 
-  it("caps the age component once daysSinceRegistration passes the cap", () => {
-    const base = { txCount: 0, totalVolumeUSD: 0, repeatCustomerRate: 0, activeWeeksInLast12: 0, refundRate: 0 };
-    const atCap = computeTrustScore({ ...base, daysSinceRegistration: 180 });
-    const wayPastCap = computeTrustScore({ ...base, daysSinceRegistration: 5000 });
-    expect(wayPastCap.score).toBe(atCap.score);
-  });
-
-  it("handles negative/garbage inputs defensively without throwing or going out of range", () => {
-    const result = computeTrustScore({
-      txCount: -5,
-      totalVolumeUSD: -100,
-      repeatCustomerRate: -1,
-      daysSinceRegistration: -30,
-      activeWeeksInLast12: -2,
-      refundRate: -1,
-    });
-    expect(result.score).toBeGreaterThanOrEqual(0);
-    expect(result.score).toBeLessThanOrEqual(MAX_SCORE);
+  it("never goes below 0", () => {
+    expect(computeTrustScore({ ...ZERO, defaults: 3 }).score).toBe(0);
   });
 });

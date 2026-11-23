@@ -1,16 +1,16 @@
-/// Filled in after each contract deploy (see contracts/README table). Kept as a
-/// single source of truth so the indexer and web app never hardcode addresses twice.
+import { QUSDC_ADDRESS, QUSDC_DECIMALS } from "./chain";
+export { QUSDC_ADDRESS, QUSDC_DECIMALS };
+
+const env = (a?: string, b?: string) => ((a ?? b ?? "") as `0x${string}`);
+
+/// Single source of truth for deployed Veriga addresses, read from env so the
+/// indexer (MERCHANT_REGISTRY_ADDRESS...) and the web app
+/// (NEXT_PUBLIC_MERCHANT_REGISTRY_ADDRESS...) never hardcode them twice.
+/// Next.js only inlines NEXT_PUBLIC_* when referenced literally, hence the explicit list.
 export const contractAddresses = {
-  merchantRegistry: (process.env.MERCHANT_REGISTRY_ADDRESS ??
-    process.env.NEXT_PUBLIC_MERCHANT_REGISTRY_ADDRESS ??
-    "") as `0x${string}`,
-  paymentReceipts: (process.env.PAYMENT_RECEIPTS_ADDRESS ??
-    process.env.NEXT_PUBLIC_PAYMENT_RECEIPTS_ADDRESS ??
-    "") as `0x${string}`,
-  trustScoreOracle: (process.env.TRUST_SCORE_ORACLE_ADDRESS ??
-    process.env.NEXT_PUBLIC_TRUST_SCORE_ORACLE_ADDRESS ??
-    "") as `0x${string}`,
-  workingCapitalPool: (process.env.WORKING_CAPITAL_POOL_ADDRESS ??
-    process.env.NEXT_PUBLIC_WORKING_CAPITAL_POOL_ADDRESS ??
-    "") as `0x${string}`,
+  merchantRegistry: env(process.env.MERCHANT_REGISTRY_ADDRESS, process.env.NEXT_PUBLIC_MERCHANT_REGISTRY_ADDRESS),
+  paymentReceipts: env(process.env.PAYMENT_RECEIPTS_ADDRESS, process.env.NEXT_PUBLIC_PAYMENT_RECEIPTS_ADDRESS),
+  trustScoreOracle: env(process.env.TRUST_SCORE_ORACLE_ADDRESS, process.env.NEXT_PUBLIC_TRUST_SCORE_ORACLE_ADDRESS),
+  workingCapitalPool: env(process.env.WORKING_CAPITAL_POOL_ADDRESS, process.env.NEXT_PUBLIC_WORKING_CAPITAL_POOL_ADDRESS),
+  forwarder: env(process.env.FORWARDER_ADDRESS, process.env.NEXT_PUBLIC_FORWARDER_ADDRESS),
 };

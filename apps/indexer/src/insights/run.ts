@@ -12,7 +12,7 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 /// Runs once per merchant, meant to be invoked weekly (see package.json "insights"
 /// script, wired to a cron in production). Pure I/O glue around computeStats.ts /
-/// summarize.ts — no business logic lives here.
+/// summarize.ts, no business logic lives here.
 export async function runWeeklyInsightsForAllMerchants(now: Date = new Date()): Promise<number> {
   const merchants = await db.merchant.findMany({ select: { wallet: true } });
   let processed = 0;

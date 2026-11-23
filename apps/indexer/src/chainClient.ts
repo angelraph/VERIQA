@@ -9,12 +9,12 @@ export const publicClient = createPublicClient({
   transport: http(rpcUrl),
 });
 
-/// Only constructed when UPDATER_PRIVATE_KEY is set — read paths (the poller,
+/// Only constructed when UPDATER_PRIVATE_KEY is set, read paths (the poller,
 /// the API server) never need it. Only the score/volume publishing job does.
 export function getUpdaterWalletClient() {
   const key = process.env.UPDATER_PRIVATE_KEY;
   if (!key) {
-    throw new Error("UPDATER_PRIVATE_KEY is not set — cannot construct a signing wallet client.");
+    throw new Error("UPDATER_PRIVATE_KEY is not set, so no signing wallet client can be built a signing wallet client.");
   }
   const account = privateKeyToAccount(key as `0x${string}`);
   return createWalletClient({
@@ -27,7 +27,7 @@ export function getUpdaterWalletClient() {
 export function requireAddress(name: keyof typeof contractAddresses): Address {
   const address = contractAddresses[name];
   if (!address) {
-    throw new Error(`${name} address is not configured — set it in apps/indexer/.env after deploying contracts.`);
+    throw new Error(`${name} address is not configured. Set it in apps/indexer/.env after deploying contracts.`);
   }
   return address;
 }

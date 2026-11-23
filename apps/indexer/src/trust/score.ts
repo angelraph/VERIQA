@@ -1,64 +1,139 @@
-/// Trust score formula from the build plan: a weighted, log-scaled function of
-/// verified on-chain payment count, volume, repeat-customer rate, and account
-/// longevity. Every input traces only to PaymentRecorded events (see
-/// deriveInputs.ts) — nothing here is self-reported by the merchant.
-const TX_COUNT_CAP = 200;
-const VOLUME_CAP_USD = 50_000;
-const REGISTRATION_AGE_CAP_DAYS = 180;
+/// Veriga Trust Score v2.
+///
+/// Open, deterministic formula. Every input traces to on-chain events
+/// (PaymentRecorded, MerchantPassVerified, MerchantNameLinked and the
+/// pool's Advance* events), so anyone can rebuild the inputs from chain data,
+/// hash them with `hashScoreInputs`, and compare with the inputsHash
+/// checkpointed in TrustScoreOracle.
+///
+/// Two evidence tiers:
+///  - Settled sales (money moved on-chain) carry the most weight.
+///  - Attested cash sales (customer co-signed) count less, and each customer's
+///    contribution is capped (see deriveInputs.ts) so fake customer keys buy
+///    very little score.
+/// Penalties: payer concentration (one wallet supplying most of the volume)
+/// and advance defaults.
 
-const WEIGHT_TX = 300;
-const WEIGHT_VOLUME = 250;
-const WEIGHT_REPEAT = 250;
-const WEIGHT_AGE = 100;
-const WEIGHT_ACTIVITY = 100;
-const WEIGHT_REFUND_PENALTY = 50;
-
+export const SCORE_VERSION = "veriga-trust-v2";
 export const MAX_SCORE = 1000;
 
+export const WEIGHTS = {
+  settledTx: 150,
+  settledVolume: 100,
+  attestedTx: 90,
+  attestedVolume: 60,
+  customerBreadth: 150,
+  repeat: 150,
+  consistency: 100,
+  age: 100,
+  identity: 50,
+  creditHistory: 50,
+  concentrationPenalty: 100,
+  defaultPenaltyEach: 200,
+  defaultPenaltyMax: 400,
+} as const;
+
+export const CAPS = {
+  settledTx: 200,
+  settledVolumeUSD: 50_000,
+  attestedTx: 300,
+  attestedVolumeUSD: 20_000,
+  distinctCustomers: 150,
+  ageDays: 180,
+  repaidAdvances: 5,
+  /// Top payer share of settled volume above which the concentration penalty starts.
+  concentrationThreshold: 0.4,
+} as const;
+
 export interface TrustScoreInputs {
-  txCount: number;
-  totalVolumeUSD: number;
-  /** 0..1 — distinct repeat-paying wallets / distinct paying wallets */
+  settledTxCount: number;
+  settledVolumeUSD: number;
+  attestedTxCount: number;
+  attestedVolumeUSD: number;
+  distinctCustomers: number;
+  /** 0..1, distinct repeat customers / distinct customers (both tiers) */
   repeatCustomerRate: number;
-  daysSinceRegistration: number;
-  /** 0..12 — distinct weeks with at least one payment, in the trailing 12 weeks */
+  /** 0..12, weeks with at least one sale in the trailing 12 weeks */
   activeWeeksInLast12: number;
-  /** 0..1 — refunded volume / total volume. Always 0 in the MVP: no refund
-   * mechanism is built yet (out of scope per the plan), so this term never
-   * fires today but is kept so the formula doesn't need to change later. */
-  refundRate: number;
+  daysSinceRegistration: number;
+  passVerified: boolean;
+  hasQieName: boolean;
+  advancesRepaid: number;
+  defaults: number;
+  /** 0..1, largest single payer's share of settled volume */
+  topPayerShare: number;
 }
 
 export interface TrustScoreBreakdown {
   score: number;
-  txComponent: number;
-  volumeComponent: number;
+  settledComponent: number;
+  attestedComponent: number;
+  breadthComponent: number;
   repeatComponent: number;
+  consistencyComponent: number;
   ageComponent: number;
-  activityComponent: number;
-  refundPenalty: number;
+  identityComponent: number;
+  creditComponent: number;
+  concentrationPenalty: number;
+  defaultPenalty: number;
 }
 
 function clamp01(value: number): number {
   return Math.min(Math.max(value, 0), 1);
 }
 
-function normalizedLog(value: number, cap: number): number {
+export function normalizedLog(value: number, cap: number): number {
   if (!Number.isFinite(value) || value <= 0) return 0;
-  const ratio = Math.log(1 + value) / Math.log(1 + cap);
-  return clamp01(ratio);
+  return clamp01(Math.log(1 + value) / Math.log(1 + cap));
 }
 
-export function computeTrustScore(inputs: TrustScoreInputs): TrustScoreBreakdown {
-  const txComponent = WEIGHT_TX * normalizedLog(inputs.txCount, TX_COUNT_CAP);
-  const volumeComponent = WEIGHT_VOLUME * normalizedLog(inputs.totalVolumeUSD, VOLUME_CAP_USD);
-  const repeatComponent = WEIGHT_REPEAT * clamp01(inputs.repeatCustomerRate);
-  const ageComponent = WEIGHT_AGE * Math.min(Math.max(inputs.daysSinceRegistration, 0) / REGISTRATION_AGE_CAP_DAYS, 1);
-  const activityComponent = WEIGHT_ACTIVITY * clamp01(inputs.activeWeeksInLast12 / 12);
-  const refundPenalty = WEIGHT_REFUND_PENALTY * clamp01(inputs.refundRate);
+export function computeTrustScore(i: TrustScoreInputs): TrustScoreBreakdown {
+  const settledComponent =
+    WEIGHTS.settledTx * normalizedLog(i.settledTxCount, CAPS.settledTx) +
+    WEIGHTS.settledVolume * normalizedLog(i.settledVolumeUSD, CAPS.settledVolumeUSD);
+  const attestedComponent =
+    WEIGHTS.attestedTx * normalizedLog(i.attestedTxCount, CAPS.attestedTx) +
+    WEIGHTS.attestedVolume * normalizedLog(i.attestedVolumeUSD, CAPS.attestedVolumeUSD);
+  const breadthComponent = WEIGHTS.customerBreadth * normalizedLog(i.distinctCustomers, CAPS.distinctCustomers);
+  // Repeat rate only means something once there are a few customers.
+  const repeatComponent = WEIGHTS.repeat * clamp01(i.repeatCustomerRate) * clamp01(i.distinctCustomers / 5);
+  const consistencyComponent = WEIGHTS.consistency * clamp01(i.activeWeeksInLast12 / 12);
+  const ageComponent = WEIGHTS.age * clamp01(i.daysSinceRegistration / CAPS.ageDays);
+  const identityComponent = (i.passVerified ? 35 : 0) + (i.hasQieName ? 15 : 0);
+  const creditComponent = WEIGHTS.creditHistory * clamp01(i.advancesRepaid / CAPS.repaidAdvances);
 
-  const raw = txComponent + volumeComponent + repeatComponent + ageComponent + activityComponent - refundPenalty;
-  const score = Math.round(clamp01(raw / MAX_SCORE) * MAX_SCORE);
+  // Phased in over the first 10 settled sales: a brand-new merchant's first
+  // customer is necessarily 100% of volume, which says nothing about washing.
+  const over = i.topPayerShare - CAPS.concentrationThreshold;
+  const concentrationPenalty =
+    over > 0
+      ? WEIGHTS.concentrationPenalty * clamp01(over / (1 - CAPS.concentrationThreshold)) * clamp01(i.settledTxCount / 10)
+      : 0;
+  const defaultPenalty = Math.min(i.defaults * WEIGHTS.defaultPenaltyEach, WEIGHTS.defaultPenaltyMax);
 
-  return { score, txComponent, volumeComponent, repeatComponent, ageComponent, activityComponent, refundPenalty };
+  const raw =
+    settledComponent +
+    attestedComponent +
+    breadthComponent +
+    repeatComponent +
+    consistencyComponent +
+    ageComponent +
+    identityComponent +
+    creditComponent -
+    concentrationPenalty -
+    defaultPenalty;
+
+  return {
+    score: Math.round(clamp01(raw / MAX_SCORE) * MAX_SCORE),
+    settledComponent,
+    attestedComponent,
+    breadthComponent,
+    repeatComponent,
+    consistencyComponent,
+    ageComponent,
+    identityComponent,
+    creditComponent,
+    concentrationPenalty,
+    defaultPenalty,
+  };
 }

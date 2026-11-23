@@ -2,18 +2,21 @@ import { http, createConfig } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { qieMainnet } from "@veriga/shared";
 
-/// Injected connector only (window.ethereum) — the most universally compatible
-/// path for any EIP-1193 wallet extension. QIE Wallet's exact connector surface
-/// (native SDK vs standard injected provider) is an open Phase 0 question; this
-/// works today with any injected wallet and can gain a dedicated connector later
-/// without changing anything else in the app.
+/// QIE Wallet announces itself through EIP-6963 (rdns "me.qiewallet"), which
+/// wagmi discovers automatically alongside any other installed wallet. The
+/// generic injected() connector covers in-app browsers that only expose
+/// window.ethereum.
 export const wagmiConfig = createConfig({
   chains: [qieMainnet],
-  connectors: [injected()],
+  connectors: [injected({ shimDisconnect: true })],
+  multiInjectedProviderDiscovery: true,
   transports: {
-    [qieMainnet.id]: http(),
+    [qieMainnet.id]: http(process.env.NEXT_PUBLIC_QIE_RPC || qieMainnet.rpcUrls.default.http[0]),
   },
+  ssr: true,
 });
+
+export const QIE_WALLET_RDNS = "me.qiewallet";
 
 declare module "wagmi" {
   interface Register {

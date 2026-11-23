@@ -1,84 +1,94 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
+import { deploySystem, signForwardRequest } from "./fixture";
 
 describe("MerchantRegistry", () => {
-  async function deployFixture() {
-    const [admin, merchant, other] = await ethers.getSigners();
-    const Registry = await ethers.getContractFactory("MerchantRegistry");
-    const registry = await Registry.deploy(admin.address);
-    return { registry, admin, merchant, other };
-  }
-
-  it("registers a new merchant", async () => {
-    const { registry, merchant } = await loadFixture(deployFixture);
-
-    await expect(registry.connect(merchant).registerMerchant("ipfs://profile"))
-      .to.emit(registry, "MerchantRegistered")
-      .withArgs(merchant.address, "ipfs://profile", anyValue);
-
+  it("registers a merchant once and exposes it", async () => {
+    const { registry, merchant } = await loadFixture(deploySystem);
     expect(await registry.isMerchant(merchant.address)).to.equal(true);
-    const record = await registry.merchants(merchant.address);
-    expect(record.active).to.equal(true);
-    expect(record.passVerified).to.equal(false);
-  });
-
-  it("reverts on double registration", async () => {
-    const { registry, merchant } = await loadFixture(deployFixture);
-    await registry.connect(merchant).registerMerchant("ipfs://profile");
-    await expect(registry.connect(merchant).registerMerchant("ipfs://profile")).to.be.revertedWithCustomError(
+    expect(await registry.isActiveMerchant(merchant.address)).to.equal(true);
+    await expect(registry.connect(merchant).registerMerchant("x")).to.be.revertedWithCustomError(
       registry,
       "AlreadyRegistered"
     );
   });
 
-  it("lets a merchant update their profile", async () => {
-    const { registry, merchant } = await loadFixture(deployFixture);
-    await registry.connect(merchant).registerMerchant("ipfs://old");
-    await expect(registry.connect(merchant).updateProfile("ipfs://new"))
-      .to.emit(registry, "MerchantProfileUpdated")
-      .withArgs(merchant.address, "ipfs://new");
+  it("emits MerchantRegistered with the profile", async () => {
+    const { registry, other } = await loadFixture(deploySystem);
+    await expect(registry.connect(other).registerMerchant("ipfs://shop")).to.emit(registry, "MerchantRegistered");
+    const m = await registry.merchants(other.address);
+    expect(m.profileURI).to.equal("ipfs://shop");
+    expect(m.active).to.equal(true);
   });
 
-  it("reverts profile update for unregistered wallet", async () => {
-    const { registry, other } = await loadFixture(deployFixture);
-    await expect(registry.connect(other).updateProfile("ipfs://x")).to.be.revertedWithCustomError(
+  it("updates profile, deactivates and reactivates only for registered merchants", async () => {
+    const { registry, merchant, other } = await loadFixture(deploySystem);
+    await registry.connect(merchant).updateProfile("ipfs://v2");
+    expect((await registry.merchants(merchant.address)).profileURI).to.equal("ipfs://v2");
+    await registry.connect(merchant).deactivate();
+    expect(await registry.isActiveMerchant(merchant.address)).to.equal(false);
+    await registry.connect(merchant).reactivate();
+    expect(await registry.isActiveMerchant(merchant.address)).to.equal(true);
+    await expect(registry.connect(other).updateProfile("x")).to.be.revertedWithCustomError(registry, "NotRegistered");
+    await expect(registry.connect(other).deactivate()).to.be.revertedWithCustomError(registry, "NotRegistered");
+  });
+
+  it("restricts QIE Pass attestation to the attester role", async () => {
+    const { registry, admin, merchant, other } = await loadFixture(deploySystem);
+    const hash = ethers.id("credential");
+    await expect(registry.connect(other).attestQiePassVerified(merchant.address, hash)).to.be.reverted;
+    await expect(registry.connect(admin).attestQiePassVerified(merchant.address, hash))
+      .to.emit(registry, "MerchantPassVerified")
+      .withArgs(merchant.address, hash);
+    expect((await registry.merchants(merchant.address)).passVerified).to.equal(true);
+    await expect(registry.connect(admin).attestQiePassVerified(other.address, hash)).to.be.revertedWithCustomError(
       registry,
       "NotRegistered"
     );
   });
 
-  it("only allows ATTESTER_ROLE to attest QIE Pass verification", async () => {
-    const { registry, merchant, other } = await loadFixture(deployFixture);
-    await registry.connect(merchant).registerMerchant("ipfs://profile");
+  it("lets a merchant with no gas register through the forwarder", async () => {
+    const sys = await loadFixture(deploySystem);
+    const { registry, forwarder, relayer } = sys;
+    const walletless = ethers.Wallet.createRandom().connect(ethers.provider);
+    const data = registry.interface.encodeFunctionData("registerMerchant", ["ipfs://walletless"]);
+    const req = await signForwardRequest(sys, walletless, await registry.getAddress(), data);
 
-    await expect(
-      registry.connect(other).attestQiePassVerified(merchant.address, ethers.encodeBytes32String("kyc"))
-    ).to.be.reverted;
+    expect(await ethers.provider.getBalance(walletless.address)).to.equal(0n);
+    await forwarder.connect(relayer).execute(req);
+    expect(await registry.isMerchant(walletless.address)).to.equal(true);
   });
 
-  it("allows the admin/attester to verify a merchant without blocking prior activity", async () => {
-    const { registry, admin, merchant } = await loadFixture(deployFixture);
-    await registry.connect(merchant).registerMerchant("ipfs://profile");
+  describe("QIE ID names", () => {
+    it("links a .qie name only when forward and reverse lookups agree", async () => {
+      const { registry, names, merchant } = await loadFixture(deploySystem);
+      await names.setName("mamatiti.qie", merchant.address, true);
+      await expect(registry.connect(merchant).linkQieName())
+        .to.emit(registry, "MerchantNameLinked")
+        .withArgs(merchant.address, "mamatiti.qie");
+      expect(await registry.qieNameOf(merchant.address)).to.equal("mamatiti.qie");
+      expect(await registry.merchantForName("mamatiti.qie")).to.equal(merchant.address);
+    });
 
-    const hash = ethers.keccak256(ethers.toUtf8Bytes("kyc-record"));
-    await expect(registry.connect(admin).attestQiePassVerified(merchant.address, hash))
-      .to.emit(registry, "MerchantPassVerified")
-      .withArgs(merchant.address, hash);
+    it("refuses a name the merchant only claims via reverse record", async () => {
+      const { registry, names, merchant, other } = await loadFixture(deploySystem);
+      await names.setName("bigshop.qie", other.address, false);
+      await names.setPrimaryOnly(merchant.address, "bigshop.qie");
+      await expect(registry.connect(merchant).linkQieName()).to.be.revertedWithCustomError(registry, "NameNotOwned");
+    });
 
-    const record = await registry.merchants(merchant.address);
-    expect(record.passVerified).to.equal(true);
-  });
+    it("stops resolving a linked name after it changes hands", async () => {
+      const { registry, names, merchant, other } = await loadFixture(deploySystem);
+      await names.setName("mamatiti.qie", merchant.address, true);
+      await registry.connect(merchant).linkQieName();
+      await names.setName("mamatiti.qie", other.address, true);
+      expect(await registry.merchantForName("mamatiti.qie")).to.equal(ethers.ZeroAddress);
+    });
 
-  it("supports deactivate/reactivate by the merchant", async () => {
-    const { registry, merchant } = await loadFixture(deployFixture);
-    await registry.connect(merchant).registerMerchant("ipfs://profile");
-
-    await registry.connect(merchant).deactivate();
-    expect((await registry.merchants(merchant.address)).active).to.equal(false);
-
-    await registry.connect(merchant).reactivate();
-    expect((await registry.merchants(merchant.address)).active).to.equal(true);
+    it("requires registration before linking", async () => {
+      const { registry, other } = await loadFixture(deploySystem);
+      await expect(registry.connect(other).linkQieName()).to.be.revertedWithCustomError(registry, "NotRegistered");
+    });
   });
 });

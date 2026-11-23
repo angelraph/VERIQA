@@ -12,7 +12,7 @@ const nextConfig = {
       "@coinbase/cdp-sdk": false,
       "@base-org/account": false,
       // Optional deps of the metaMask/walletConnect connectors we don't use
-      // (React Native storage, pino's dev-only pretty-printer) — safe to skip.
+      // (React Native storage, pino's dev-only pretty-printer), safe to skip.
       "@react-native-async-storage/async-storage": false,
       "pino-pretty": false,
     };

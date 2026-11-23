@@ -10,7 +10,8 @@
     "test": "vitest run",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy"
+    "db:migrate:deploy": "prisma migrate deploy",
+    "publish-scores": "tsx src/publisher.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

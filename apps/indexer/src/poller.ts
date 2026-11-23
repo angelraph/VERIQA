@@ -1,108 +1,138 @@
 import "dotenv/config";
-import { merchantRegistryAbi, paymentReceiptsAbi } from "@veriga/shared";
+import { parseEventLogs, type Log } from "viem";
+import { merchantRegistryAbi, paymentReceiptsAbi, workingCapitalPoolAbi } from "@veriga/shared";
 import { publicClient, requireAddress } from "./chainClient";
 import { PrismaRepository } from "./prismaRepository";
 import {
   handleMerchantRegistered,
   handleMerchantPassVerified,
   handleMerchantActiveChanged,
+  handleMerchantProfileUpdated,
+  handleMerchantNameLinked,
   handlePaymentRecorded,
+  handleAdvanceRequested,
+  handleAdvanceRepaid,
+  handleAdvanceClosed,
+  handleAdvanceDefaulted,
 } from "./eventHandlers";
 import type { Repository } from "./repository";
 
 const STATE_KEY = "lastBlock";
 const BLOCK_CHUNK = 2000n;
-const POLL_INTERVAL_MS = 15_000;
+const POLL_INTERVAL_MS = Number(process.env.POLL_INTERVAL_MS ?? 5_000);
 
-async function pollRange(repo: Repository, fromBlock: bigint, toBlock: bigint): Promise<void> {
-  const merchantRegistry = requireAddress("merchantRegistry");
-  const paymentReceipts = requireAddress("paymentReceipts");
+type AnyDecoded = { eventName: string; args: any; blockNumber: bigint; transactionHash: `0x${string}`; logIndex: number };
 
-  const [registeredLogs, verifiedLogs, deactivatedLogs, reactivatedLogs, paymentLogs] = await Promise.all([
-    publicClient.getLogs({
-      address: merchantRegistry,
-      event: merchantRegistryAbi.find((e) => e.type === "event" && e.name === "MerchantRegistered")!,
-      fromBlock,
-      toBlock,
-    }),
-    publicClient.getLogs({
-      address: merchantRegistry,
-      event: merchantRegistryAbi.find((e) => e.type === "event" && e.name === "MerchantPassVerified")!,
-      fromBlock,
-      toBlock,
-    }),
-    publicClient.getLogs({
-      address: merchantRegistry,
-      event: merchantRegistryAbi.find((e) => e.type === "event" && e.name === "MerchantDeactivated")!,
-      fromBlock,
-      toBlock,
-    }),
-    publicClient.getLogs({
-      address: merchantRegistry,
-      event: merchantRegistryAbi.find((e) => e.type === "event" && e.name === "MerchantReactivated")!,
-      fromBlock,
-      toBlock,
-    }),
-    publicClient.getLogs({
-      address: paymentReceipts,
-      event: paymentReceiptsAbi.find((e) => e.type === "event" && e.name === "PaymentRecorded")!,
-      fromBlock,
-      toBlock,
-    }),
+/// Fetches every Veriga log in [from, to] in one getLogs call per contract,
+/// decodes them, and applies them strictly in chain order (block, logIndex), so
+/// advance state and score checkpoints always reflect a consistent history.
+export async function pollRange(repo: Repository, fromBlock: bigint, toBlock: bigint): Promise<number> {
+  const addresses = {
+    registry: requireAddress("merchantRegistry"),
+    receipts: requireAddress("paymentReceipts"),
+    pool: requireAddress("workingCapitalPool"),
+  };
+  const [registryLogs, receiptLogs, poolLogs] = await Promise.all([
+    publicClient.getLogs({ address: addresses.registry, fromBlock, toBlock }),
+    publicClient.getLogs({ address: addresses.receipts, fromBlock, toBlock }),
+    publicClient.getLogs({ address: addresses.pool, fromBlock, toBlock }),
   ]);
 
-  for (const log of registeredLogs) {
-    const { wallet, profileURI, createdAt } = log.args as { wallet: string; profileURI: string; createdAt: bigint };
-    await handleMerchantRegistered(repo, { wallet, profileURI, createdAt, blockNumber: log.blockNumber! });
-  }
+  const decoded: AnyDecoded[] = [
+    ...(parseEventLogs({ abi: merchantRegistryAbi, logs: registryLogs as Log[] }) as unknown as AnyDecoded[]),
+    ...(parseEventLogs({ abi: paymentReceiptsAbi, logs: receiptLogs as Log[], eventName: "PaymentRecorded" }) as unknown as AnyDecoded[]),
+    ...(parseEventLogs({ abi: workingCapitalPoolAbi, logs: poolLogs as Log[] }) as unknown as AnyDecoded[]),
+  ].sort((a, b) => (a.blockNumber === b.blockNumber ? a.logIndex - b.logIndex : Number(a.blockNumber - b.blockNumber)));
 
-  for (const log of verifiedLogs) {
-    const { wallet } = log.args as { wallet: string };
-    await handleMerchantPassVerified(repo, { wallet });
-  }
+  const blockTimes = new Map<bigint, Date>();
+  const timeOf = async (bn: bigint) => {
+    let t = blockTimes.get(bn);
+    if (!t) {
+      const block = await publicClient.getBlock({ blockNumber: bn });
+      t = new Date(Number(block.timestamp) * 1000);
+      blockTimes.set(bn, t);
+    }
+    return t;
+  };
 
-  for (const log of deactivatedLogs) {
-    const { wallet } = log.args as { wallet: string };
-    await handleMerchantActiveChanged(repo, { wallet, active: false });
+  for (const log of decoded) {
+    const a = log.args;
+    switch (log.eventName) {
+      case "MerchantRegistered":
+        await handleMerchantRegistered(repo, { wallet: a.wallet, profileURI: a.profileURI, createdAt: a.createdAt, blockNumber: log.blockNumber });
+        break;
+      case "MerchantProfileUpdated":
+        await handleMerchantProfileUpdated(repo, a.wallet, a.profileURI);
+        break;
+      case "MerchantPassVerified":
+        await handleMerchantPassVerified(repo, a.wallet);
+        break;
+      case "MerchantDeactivated":
+        await handleMerchantActiveChanged(repo, a.wallet, false);
+        break;
+      case "MerchantReactivated":
+        await handleMerchantActiveChanged(repo, a.wallet, true);
+        break;
+      case "MerchantNameLinked":
+        await handleMerchantNameLinked(repo, a.wallet, a.qieName);
+        break;
+      case "PaymentRecorded":
+        await handlePaymentRecorded(repo, {
+          receiptId: a.receiptId,
+          merchant: a.merchant,
+          payer: a.payer,
+          amount: a.amount,
+          invoiceRef: a.invoiceRef,
+          timestamp: a.timestamp,
+          tier: Number(a.tier),
+          method: Number(a.method),
+          repaidToPool: a.repaidToPool,
+          txHash: log.transactionHash,
+          blockNumber: log.blockNumber,
+        });
+        break;
+      case "AdvanceRequested":
+        await handleAdvanceRequested(repo, {
+          merchant: a.merchant,
+          principal: a.principal,
+          fee: a.fee,
+          repayBps: a.repayBps,
+          dueAt: a.dueAt,
+          timestamp: await timeOf(log.blockNumber),
+          txHash: log.transactionHash,
+        });
+        break;
+      case "AdvanceRepaid":
+        await handleAdvanceRepaid(repo, {
+          merchant: a.merchant,
+          from: a.from,
+          amount: a.amount,
+          automatic: a.automatic,
+          remaining: a.remaining,
+          timestamp: await timeOf(log.blockNumber),
+          txHash: log.transactionHash,
+          logIndex: log.logIndex,
+        });
+        break;
+      case "AdvanceClosed":
+        await handleAdvanceClosed(repo, a.merchant, await timeOf(log.blockNumber));
+        break;
+      case "AdvanceDefaulted":
+        await handleAdvanceDefaulted(repo, a.merchant, await timeOf(log.blockNumber));
+        break;
+      default:
+        break;
+    }
   }
-
-  for (const log of reactivatedLogs) {
-    const { wallet } = log.args as { wallet: string };
-    await handleMerchantActiveChanged(repo, { wallet, active: true });
-  }
-
-  // Payments must be processed in block order so trust-score checkpoints
-  // reflect a consistent, monotonically-growing payment history.
-  const sortedPaymentLogs = [...paymentLogs].sort((a, b) => Number(a.blockNumber! - b.blockNumber!));
-  for (const log of sortedPaymentLogs) {
-    const { receiptId, merchant, payer, amount, invoiceRef, timestamp } = log.args as {
-      receiptId: bigint;
-      merchant: string;
-      payer: string;
-      amount: bigint;
-      invoiceRef: string;
-      timestamp: bigint;
-    };
-    await handlePaymentRecorded(repo, {
-      receiptId,
-      merchant,
-      payer,
-      amount,
-      invoiceRef,
-      timestamp,
-      txHash: log.transactionHash!,
-      blockNumber: log.blockNumber!,
-    });
-  }
+  return decoded.length;
 }
 
 export async function pollOnce(repo: Repository): Promise<void> {
   const latestBlock = await publicClient.getBlockNumber();
-  const lastProcessed = (await repo.getLastProcessedBlock(STATE_KEY)) ?? latestBlock - 1n;
+  const startBlock = process.env.START_BLOCK ? BigInt(process.env.START_BLOCK) : latestBlock - 1n;
+  const lastProcessed = (await repo.getLastProcessedBlock(STATE_KEY)) ?? startBlock - 1n;
 
   let from = lastProcessed + 1n;
-  if (from > latestBlock) return;
-
   while (from <= latestBlock) {
     const to = from + BLOCK_CHUNK - 1n > latestBlock ? latestBlock : from + BLOCK_CHUNK - 1n;
     await pollRange(repo, from, to);
