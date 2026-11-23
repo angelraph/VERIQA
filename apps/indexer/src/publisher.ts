@@ -33,9 +33,6 @@ export async function publishScores(now = new Date()): Promise<{ published: numb
       skipped++;
       continue;
     }
-    if (publishedAt !== 0n && Number(score) === latest.score && onChainPeriod === period - 1) {
-      // unchanged since last week: still publish so the period stays current
-    }
     const hash = await wallet.writeContract({
       address: oracle,
       abi: trustScoreOracleAbi,
@@ -49,7 +46,8 @@ export async function publishScores(now = new Date()): Promise<{ published: numb
   return { published, skipped };
 }
 
-if (require.main === module) {
+// Only when run directly with tsx, never when bundled into a serverless function.
+if (typeof require !== "undefined" && typeof module !== "undefined" && require.main === module) {
   publishScores()
     .then((r) => {
       console.log(`[publisher] published ${r.published}, skipped ${r.skipped}`);

@@ -7,11 +7,13 @@
     "start": "tsx src/server.ts",
     "poll": "tsx src/poller.ts",
     "insights": "tsx src/insights/run.ts",
-    "test": "vitest run",
+    "test": "node scripts/sqlite-schema.mjs && prisma generate --schema prisma/schema.sqlite.prisma && vitest run",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "publish-scores": "tsx src/publisher.ts"
+    "publish-scores": "tsx src/publisher.ts",
+    "db:push": "prisma db push --skip-generate",
+    "dev:sqlite": "node scripts/sqlite-schema.mjs && prisma generate --schema prisma/schema.sqlite.prisma && tsx watch src/server.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
@@ -33,5 +35,6 @@
     "tsx": "^4.19.0",
     "typescript": "^5.5.0",
     "vitest": "^2.1.0"
-  }
+  },
+  "main": "src/server.ts"
 }

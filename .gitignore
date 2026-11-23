@@ -36,3 +36,6 @@ contracts/deployments/localFork.json
 
 .vercel
 .env*
+
+# Generated for tests from schema.prisma
+apps/indexer/prisma/schema.sqlite.prisma

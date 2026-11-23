@@ -154,7 +154,8 @@ export async function runPoller(): Promise<never> {
   }
 }
 
-if (require.main === module) {
+// Only when run directly with tsx, never when bundled into a serverless function.
+if (typeof require !== "undefined" && typeof module !== "undefined" && require.main === module) {
   runPoller().catch((err) => {
     console.error("[poller] fatal error:", err);
     process.exit(1);

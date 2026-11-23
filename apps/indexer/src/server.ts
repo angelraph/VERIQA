@@ -7,6 +7,7 @@ import { tractionRouter } from "./routes/traction";
 import { relayRouter } from "./relayer/router";
 import { fxRouter } from "./routes/fx";
 import { receiptsRouter } from "./routes/receipts";
+import { syncIfStale, syncNow } from "./sync";
 
 const app = express();
 app.use(cors());
@@ -29,6 +30,40 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+// On serverless hosting there is no always-on poller, so reads first catch up
+// on the chain (throttled, locked and time-bounded; see sync.ts).
+const catchUp: express.RequestHandler = (_req, _res, next) => {
+  syncIfStale()
+    .catch(() => undefined)
+    .finally(() => next());
+};
+app.use(["/api/merchants", "/api/customers", "/api/traction", "/api/receipts"], catchUp);
+
+// Daily job from Vercel Cron: catch up on the chain, then checkpoint scores
+// on-chain if a score publisher key is configured. Vercel signs cron calls
+// with CRON_SECRET.
+app.get("/api/cron/daily", async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.headers.authorization !== `Bearer ${secret}`) {
+    res.status(401).json({ error: "unauthorized" });
+    return;
+  }
+  const out: Record<string, unknown> = {};
+  try {
+    out.sync = await syncNow();
+    const { normalizePrivateKey } = await import("./keys");
+    if (normalizePrivateKey(process.env.UPDATER_PRIVATE_KEY)) {
+      const { publishScores } = await import("./publisher");
+      out.scores = await publishScores();
+    } else {
+      out.scores = "skipped, no UPDATER_PRIVATE_KEY";
+    }
+    res.json({ ok: true, ...out });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: (e as Error).message, ...out });
+  }
+});
+
 app.use("/api/merchants", merchantsRouter);
 app.use("/api/customers", customersRouter);
 app.use("/api/traction", tractionRouter);
@@ -44,7 +79,8 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 
 const port = Number(process.env.PORT ?? 4000);
 
-if (require.main === module) {
+// Only when run directly with tsx, never when bundled into a serverless function.
+if (typeof require !== "undefined" && typeof module !== "undefined" && require.main === module) {
   app.listen(port, () => {
     console.log(`[indexer] API listening on :${port}`);
   });

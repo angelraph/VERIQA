@@ -23,7 +23,7 @@ beforeAll(async () => {
   process.env.DATABASE_URL = testDbUrl;
   // Keep the API test independent of any local .env (dotenv never overrides set vars).
   for (const k of ["RELAYER_PRIVATE_KEY", "UPDATER_PRIVATE_KEY", "TEAM_WALLETS"]) process.env[k] = "";
-  execSync("npx prisma db push --skip-generate --accept-data-loss", {
+  execSync("npx prisma db push --schema prisma/schema.sqlite.prisma --skip-generate --accept-data-loss", {
     cwd: path.resolve(__dirname, ".."),
     env: { ...process.env, DATABASE_URL: testDbUrl },
     stdio: "ignore",

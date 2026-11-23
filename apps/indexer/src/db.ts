@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
-/// Single shared instance across the poller, insights job, and API server , 
-/// avoids exhausting SQLite/Postgres connections under tsx's hot-reload.
-export const db = new PrismaClient();
+/// One shared client per process. On Vercel a warm function instance reuses
+/// it across requests instead of opening new database connections each time.
+const g = globalThis as unknown as { veriga_db?: PrismaClient };
+export const db = g.veriga_db ?? new PrismaClient();
+g.veriga_db = db;

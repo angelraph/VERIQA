@@ -46,7 +46,7 @@ export default function PayPage({ params }: { params: { id: string } }) {
   const profile = decodeProfile(merchant.data?.profileURI);
 
   const { address, isConnected } = useAccount();
-  const [amount, setAmount] = useState(search.get("amount") ?? "");
+  const [amount, setAmount] = useState(search?.get("amount") ?? "");
   const [method, setMethod] = useState<"qusdc" | "qie">("qusdc");
   const [invoiceRef] = useState(() => keccak256(toBytes(`${Date.now()}-${Math.random()}`)));
 
