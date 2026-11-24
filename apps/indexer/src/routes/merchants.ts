@@ -6,6 +6,8 @@ import { computeTrustScore, SCORE_VERSION, WEIGHTS, CAPS } from "../trust/score"
 import { buildCsv } from "../statements/csv";
 import { buildCamt053 } from "../statements/camt053";
 import type { StatementInput } from "../statements/statement";
+import { computeWeeklyStats } from "../insights/computeStats";
+import { generateTemplateSummary } from "../insights/template";
 
 export const merchantsRouter = Router();
 
@@ -219,6 +221,30 @@ merchantsRouter.get("/:id/score-history", async (req, res) => {
       publishTxHash: r.publishTxHash,
     })),
   });
+});
+
+merchantsRouter.get("/:id/insights/live", async (req, res) => {
+  const wallet = await resolveMerchantParam(req.params.id);
+  const state = wallet ? await loadMerchantState(wallet) : null;
+  if (!wallet || !state) {
+    res.status(404).json({ error: "merchant not found" });
+    return;
+  }
+  const now = new Date();
+  const [payments, weekAgo] = await Promise.all([
+    db.payment.findMany({ where: { merchantWallet: wallet }, select: { payer: true, amount: true, timestamp: true } }),
+    db.scoreHistory.findFirst({
+      where: { merchantWallet: wallet, computedAt: { lte: new Date(now.getTime() - 7 * 86_400_000) } },
+      orderBy: { computedAt: "desc" },
+    }),
+  ]);
+  const stats = computeWeeklyStats({
+    payments: payments.map((p) => ({ payer: p.payer.toLowerCase(), amountUSD: baseUnitsToUSD(p.amount), timestamp: p.timestamp })),
+    currentScore: state.breakdown.score,
+    scoreOneWeekAgo: weekAgo?.score ?? null,
+    now,
+  });
+  res.json({ stats, sentences: generateTemplateSummary(stats) });
 });
 
 merchantsRouter.get("/:id/insights", async (req, res) => {

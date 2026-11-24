@@ -58,6 +58,10 @@ app.get("/api/cron/daily", async (req, res) => {
     } else {
       out.scores = "skipped, no publisher key";
     }
+    if (new Date().getUTCDay() === 1) {
+      const { runWeeklyInsightsForAllMerchants } = await import("./insights/run");
+      out.insights = await runWeeklyInsightsForAllMerchants();
+    }
     res.json({ ok: true, ...out });
   } catch (e) {
     res.status(500).json({ ok: false, error: (e as Error).message, ...out });

@@ -209,3 +209,20 @@ export interface ReceiptDetail {
 
 export const fetchMerchants = () => getJson<{ merchants: DirectoryMerchant[] }>("/merchants").then((d) => d.merchants);
 export const fetchReceipt = (id: string) => getJson<ReceiptDetail>(`/receipts/${encodeURIComponent(id)}`);
+
+export interface LiveInsight {
+  stats: {
+    scoreDelta: number;
+    currentScore: number;
+    revenueThisWeek: number;
+    revenueLastWeek: number;
+    revenueChangePct: number | null;
+    uniqueCustomersThisWeek: number;
+    uniqueCustomersTrailingAvg: number;
+    daysSinceTopCustomerLastPaid: number | null;
+    newCustomerCount: number;
+    repeatCustomerRate: number;
+  };
+  sentences: string[];
+}
+export const fetchLiveInsight = (id: string) => getJson<LiveInsight>(`/merchants/${encodeURIComponent(id)}/insights/live`);

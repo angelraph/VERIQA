@@ -224,9 +224,13 @@ function Capital() {
             ))}
           </div>
         ) : (
-          <p className="border-t border-ink-100 px-6 py-8 text-sm text-ink-500">No advances yet. Your first one starts at up to $100.</p>
+          <p className="border-t border-ink-100 px-6 py-8 text-sm text-ink-500">No advances yet. Your first one starts small and doubles each time you repay on time.</p>
         )}
       </Card>
+
+      <p className="text-center text-sm text-ink-500">
+        Curious where the money comes from? <a href="/dashboard/pool" className="link">See the lending pool</a>.
+      </p>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { signSaleOffer, encodeOffer, type SaleOffer } from "@/lib/relay";
 import { fetchMerchantSales } from "@/lib/api";
 import { useMoney, formatUSD, formatLocal, symbolFor, CURRENCIES } from "@/lib/money";
 import { Button, Card, ErrorText, TxLink, Spinner } from "@/components/ui";
+import { useLang } from "@/lib/i18n";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫"];
 const CASH_CAP_UNITS = 5_000_000_000n;
@@ -28,6 +29,7 @@ export default function SellPage() {
 function Sell() {
   const { id, m } = useShop();
   const money = useMoney();
+  const { t } = useLang();
   const [entry, setEntry] = useState("");
   const [mode, setMode] = useState<"cash" | "crypto">("cash");
   const [offer, setOffer] = useState<SaleOffer | null>(null);
@@ -117,7 +119,7 @@ function Sell() {
     <div className="mx-auto max-w-md space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wide text-ink-400">Selling as</div>
+          <div className="text-xs font-medium uppercase tracking-wide text-ink-400">{t("sell.sellingAs")}</div>
           <div className="truncate font-semibold">{m.qieName ?? m.profile.name}</div>
         </div>
         <div className="flex rounded-full bg-white p-1 text-sm ring-1 ring-ink-200">
@@ -130,7 +132,7 @@ function Sell() {
               }}
               className={`rounded-full px-3.5 py-1.5 font-medium transition ${mode === x ? "bg-ink-900 text-white" : "text-ink-500"}`}
             >
-              {x === "cash" ? "Cash" : "Crypto"}
+              {x === "cash" ? t("sell.cash") : t("sell.crypto")}
             </button>
           ))}
         </div>
@@ -143,10 +145,10 @@ function Sell() {
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 16 }} className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-mint-50 text-3xl text-mint-600 ring-8 ring-mint-50/60">
                 ✓
               </motion.div>
-              <div className="mt-4 text-xl font-bold">Sale confirmed by your customer</div>
+              <div className="mt-4 text-xl font-bold">{t("sell.confirmed")}</div>
               <div className="mt-1 text-ink-500">{money.fmt(confirmed.amountUSD)}</div>
               <div className="mt-3 text-sm">
-                {confirmed.txHash ? <TxLink hash={confirmed.txHash} label="Recorded on QIE" /> : <span className="text-ink-500">Recorded on QIE</span>}
+                {confirmed.txHash ? <TxLink hash={confirmed.txHash} label={t("sell.recorded")} /> : <span className="text-ink-500">{t("sell.recorded")}</span>}
               </div>
               <Button
                 className="mt-6 w-full"
@@ -155,14 +157,14 @@ function Sell() {
                   setEntry("");
                 }}
               >
-                Next sale
+                {t("sell.next")}
               </Button>
             </Card>
           </motion.div>
         ) : offer || (mode === "crypto" && showCryptoQr) ? (
           <motion.div key="qr" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <Card className="text-center">
-              <div className="text-sm text-ink-500">{mode === "cash" ? "Ask your customer to scan and confirm" : "Ask your customer to scan and pay"}</div>
+              <div className="text-sm text-ink-500">{mode === "cash" ? t("sell.askConfirm") : t("sell.askPay")}</div>
               <div className="mt-1 font-display text-4xl font-bold">{amountLabel}</div>
               {money.currency !== "USD" && usd ? <div className="text-sm text-ink-400">about {formatUSD(usd)}, recorded on-chain in dollars</div> : null}
               <div className="relative mx-auto mt-5 w-fit rounded-3xl bg-white p-4 shadow-lift ring-1 ring-ink-200/70">
@@ -170,21 +172,26 @@ function Sell() {
               </div>
               {mode === "cash" && (
                 <div className="mt-5 flex items-center justify-center gap-2 text-sm text-ink-500">
-                  <Spinner className="h-3.5 w-3.5 text-violet-600" /> Waiting for your customer to confirm
+                  <Spinner className="h-3.5 w-3.5 text-violet-600" /> {t("sell.waiting")}
                 </div>
               )}
               <div className="mt-5 grid grid-cols-2 gap-2">
                 <Button variant="secondary" onClick={reset}>
-                  Change amount
+                  {t("sell.change")}
                 </Button>
                 <Button variant="secondary" onClick={share}>
-                  {copied ? "Link copied" : "Share link"}
+                  {copied ? t("sell.copied") : t("sell.share")}
                 </Button>
               </div>
+              {mode === "cash" && (
+                <a href={cashUrl} target="_blank" rel="noreferrer" className="mt-3 inline-block text-xs font-medium text-violet-700 hover:underline">
+                  Testing on one phone? Open the customer screen here
+                </a>
+              )}
               <p className="mt-4 text-xs leading-5 text-ink-400">
                 {mode === "cash"
-                  ? "Works once, for 15 minutes. Your customer's phone co-signs the sale and nobody pays a fee."
-                  : "They can pay in QUSDC, or in QIE that swaps to QUSDC through QIEDEX in the same transaction."}
+                  ? t("sell.cashNote")
+                  : t("sell.cryptoNote")}
               </p>
             </Card>
           </motion.div>
@@ -192,7 +199,7 @@ function Sell() {
           <motion.div key="pad" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <Card>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-ink-500">Amount</span>
+                <span className="text-sm text-ink-500">{t("sell.amount")}</span>
                 <select value={money.currency} onChange={(e) => money.setCurrency(e.target.value)} className="rounded-full bg-canvas px-3 py-1 text-xs font-medium ring-1 ring-ink-200" aria-label="Currency">
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -206,7 +213,7 @@ function Sell() {
                 {entry || "0"}
               </div>
               <div className="h-5 text-right text-sm text-ink-400">
-                {money.currency !== "USD" && usd ? `about ${formatUSD(usd)}` : money.currency !== "USD" && !money.rate ? "Getting today's rate" : ""}
+                {money.currency !== "USD" && usd ? `about ${formatUSD(usd)}` : money.currency !== "USD" && !money.rate ? t("sell.rate") : ""}
               </div>
               <div className="mt-4 grid grid-cols-3 gap-2">
                 {KEYS.map((k) => (
@@ -217,14 +224,14 @@ function Sell() {
               </div>
               {mode === "cash" ? (
                 <Button className="mt-4 w-full py-4 text-base" disabled={units === 0n || units > CASH_CAP_UNITS} loading={busy} onClick={createCashQr}>
-                  Show confirmation QR
+                  {t("sell.showQr")}
                 </Button>
               ) : (
                 <Button className="mt-4 w-full py-4 text-base" onClick={() => setShowCryptoQr(true)}>
-                  {units > 0n ? "Show payment QR" : "Show QR, customer types the amount"}
+                  {units > 0n ? t("sell.showPayQr") : t("sell.showPayQrOpen")}
                 </Button>
               )}
-              {units > CASH_CAP_UNITS && mode === "cash" && <p className="mt-2 text-sm text-amber-600">Cash sales are capped at $5,000 each.</p>}
+              {units > CASH_CAP_UNITS && mode === "cash" && <p className="mt-2 text-sm text-amber-600">{t("sell.cap")}</p>}
               <ErrorText error={error} />
             </Card>
           </motion.div>

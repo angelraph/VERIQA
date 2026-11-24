@@ -7,6 +7,8 @@ import { Logo } from "@/components/brand/Logo";
 import { ConnectWalletButton } from "@/components/ConnectWalletButton";
 import { useIdentity } from "@/lib/identity";
 import { useMerchant } from "@/lib/useMerchant";
+import { useLang } from "@/lib/i18n";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 
 const ICONS: Record<string, ReactNode> = {
   home: <path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5Z" />,
@@ -15,17 +17,20 @@ const ICONS: Record<string, ReactNode> = {
   capital: <path d="M12 3v18M17 7H9.5a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H6" />,
   statements: <path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6" />,
   receipts: <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6" />,
+  poster: <path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h3" />,
   settings: <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />,
 };
 
 const NAV = [
-  { href: "/dashboard", label: "Home", icon: "home", exact: true },
-  { href: "/sell", label: "Sell", icon: "sell" },
-  { href: "/dashboard/sales", label: "Sales", icon: "sales" },
-  { href: "/dashboard/capital", label: "Capital", icon: "capital" },
-  { href: "/dashboard/statements", label: "Statements", icon: "statements" },
-  { href: "/me/receipts", label: "My receipts", icon: "receipts" },
-  { href: "/dashboard/settings", label: "Settings", icon: "settings" },
+  { href: "/dashboard", label: "nav.home", icon: "home", exact: true },
+  { href: "/sell", label: "nav.sell", icon: "sell" },
+  { href: "/dashboard/sales", label: "nav.sales", icon: "sales" },
+  { href: "/dashboard/capital", label: "nav.capital", icon: "capital" },
+  { href: "/dashboard/statements", label: "nav.statements", icon: "statements" },
+  { href: "/me/receipts", label: "nav.receipts", icon: "receipts" },
+  { href: "/poster", label: "nav.poster", icon: "poster" },
+  { href: "/dashboard/pool", label: "nav.pool", icon: "capital" },
+  { href: "/dashboard/settings", label: "nav.settings", icon: "settings" },
 ];
 
 const MOBILE = ["/dashboard", "/sell", "/dashboard/sales", "/dashboard/capital", "/dashboard/settings"];
@@ -42,6 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const path = usePathname() ?? "";
   const id = useIdentity();
   const m = useMerchant(id.address);
+  const { t } = useLang();
   const isActive = (href: string, exact?: boolean) => (exact ? path === href : path === href || path.startsWith(href + "/"));
 
   return (
@@ -66,7 +72,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${isActive(n.href, n.exact) ? "bg-violet-50 text-violet-800" : "text-ink-600 hover:bg-ink-100 hover:text-ink-900"}`}
             >
               <Icon name={n.icon} />
-              {n.label}
+              {t(n.label)}
             </Link>
           ))}
         </nav>
@@ -88,10 +94,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link href="/" className="lg:hidden" aria-label="Veriga home">
               <Logo size="sm" />
             </Link>
-            <div className="hidden text-sm text-ink-500 lg:block">{NAV.find((n) => isActive(n.href, n.exact))?.label ?? "Veriga"}</div>
+            <div className="hidden text-sm text-ink-500 lg:block">{t(NAV.find((n) => isActive(n.href, n.exact))?.label ?? "Veriga")}</div>
             <div className="flex items-center gap-2">
+              <LanguageSwitch />
               <Link href="/sell" className="hidden rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-glow sm:inline-flex">
-                Record a sale
+                {t("nav.record")}
               </Link>
               <ConnectWalletButton compact />
             </div>
@@ -104,7 +111,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {NAV.filter((n) => MOBILE.includes(n.href)).map((n) => (
           <Link key={n.href} href={n.href} className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${isActive(n.href, n.exact) ? "text-violet-700" : "text-ink-500"}`}>
             <Icon name={n.icon} />
-            {n.label}
+            {t(n.label)}
           </Link>
         ))}
       </nav>

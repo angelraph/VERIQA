@@ -12,6 +12,8 @@ import { ADDR, isDeployed } from "@/lib/config";
 import { CURRENCIES, useCurrency } from "@/lib/money";
 import { ConnectWalletButton } from "@/components/ConnectWalletButton";
 import { Button, Card, ErrorText, Badge } from "@/components/ui";
+import { useLang } from "@/lib/i18n";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 
 const CATEGORIES = ["Food & groceries", "Fashion & tailoring", "Beauty & salon", "Phones & electronics", "Pharmacy", "Restaurant", "Services", "Transport", "Other"];
 
@@ -20,6 +22,7 @@ export default function OnboardPage() {
   const id = useIdentity();
   const m = useMerchant(id.address);
   const [currency, setCurrency] = useCurrency();
+  const { t } = useLang();
   const [name, setName] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [city, setCity] = useState("");
@@ -75,12 +78,15 @@ export default function OnboardPage() {
           <span className={`h-1.5 w-8 rounded-full ${step >= 2 ? "bg-brand" : "bg-ink-200"}`} />
           <span className="ml-1">Step {step} of 2</span>
         </div>
-        <h1 className="mt-4 text-3xl font-bold">Open your Veriga shop</h1>
-        <p className="mt-1 text-ink-500">Free, under a minute, and no crypto needed.</p>
+        <div className="mt-4 flex items-start justify-between gap-3">
+          <h1 className="text-3xl font-bold">{t("onb.title")}</h1>
+          <LanguageSwitch />
+        </div>
+        <p className="mt-1 text-ink-500">{t("onb.sub")}</p>
       </div>
 
       <Card>
-        <div className="text-sm font-semibold">How do you want to sign in?</div>
+        <div className="text-sm font-semibold">{t("onb.how")}</div>
         <div className="mt-3 grid gap-2">
           <button
             onClick={() => id.createDevice()}
@@ -88,26 +94,26 @@ export default function OnboardPage() {
             className={`rounded-2xl p-4 text-left ring-1 transition ${id.mode === "device" ? "bg-violet-50 ring-2 ring-violet-500" : "ring-ink-200 hover:ring-ink-300"}`}
           >
             <div className="flex items-center justify-between gap-2 font-semibold">
-              Use this phone <Badge tone="violet">No wallet, no fees</Badge>
+              {t("onb.phone")} <Badge tone="violet">{t("onb.phoneTag")}</Badge>
             </div>
-            <div className="mt-1 text-sm text-ink-500">A secure key is created on this phone, and Veriga pays the network fees.</div>
+            <div className="mt-1 text-sm text-ink-500">{t("onb.phoneBody")}</div>
           </button>
           <div className={`rounded-2xl p-4 ring-1 transition ${id.mode === "wallet" ? "bg-violet-50 ring-2 ring-violet-500" : "ring-ink-200"}`}>
             <div className="flex items-center justify-between gap-2 font-semibold">
               QIE Wallet <ConnectWalletButton compact />
             </div>
-            <div className="mt-1 text-sm text-ink-500">Best if you also want QUSDC or QIE payments and a .qie name.</div>
+            <div className="mt-1 text-sm text-ink-500">{t("onb.walletBody")}</div>
           </div>
         </div>
       </Card>
 
       <Card>
         <label className="block text-sm font-medium text-ink-700">
-          Shop name
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="Type your shop name" className="input mt-1.5" />
+          {t("onb.name")}
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder={t("onb.namePh")} className="input mt-1.5" />
         </label>
         <label className="mt-4 block text-sm font-medium text-ink-700">
-          What do you sell?
+          {t("onb.what")}
           <select value={category} onChange={(e) => setCategory(e.target.value)} className="input mt-1.5">
             {CATEGORIES.map((c) => (
               <option key={c}>{c}</option>
@@ -116,11 +122,11 @@ export default function OnboardPage() {
         </label>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm font-medium text-ink-700">
-            City or market
-            <input value={city} onChange={(e) => setCity(e.target.value)} maxLength={40} placeholder="For example, Balogun, Lagos" className="input mt-1.5" />
+            {t("onb.city")}
+            <input value={city} onChange={(e) => setCity(e.target.value)} maxLength={40} placeholder={t("onb.cityPh")} className="input mt-1.5" />
           </label>
           <label className="block text-sm font-medium text-ink-700">
-            Your currency
+            {t("onb.currency")}
             <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="input mt-1.5">
               {CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -131,11 +137,11 @@ export default function OnboardPage() {
           </label>
         </div>
         <Button onClick={register} loading={busy} disabled={name.trim().length < 2} className="mt-6 w-full py-3.5 text-base">
-          {busy ? "Registering on QIE" : "Open my shop"}
+          {busy ? t("onb.opening") : t("onb.open")}
         </Button>
         <ErrorText error={error} />
         <p className="mt-3 text-xs text-ink-400">
-          Your shop name and city are public on QIE. Leave out personal details. Once your shop is open, you type sale amounts on the Sell screen.
+          {t("onb.public")}
         </p>
       </Card>
     </div>

@@ -12,6 +12,7 @@ export const PRODUCT_LINKS: NavItem[] = [
 ];
 
 export const PROOF_LINKS: NavItem[] = [
+  { href: "/try", label: "Try it in 3 minutes", body: "A guided tour of the live product on QIE mainnet" },
   { href: "/traction", label: "Live traction", body: "Real merchants and customers, counted honestly" },
   { href: "/explore", label: "Merchant directory", body: "Browse every shop and its public record" },
   { href: "/security", label: "Security", body: "What the contracts guarantee, and what they don't" },
@@ -37,6 +38,7 @@ export const FOOTER_COLUMNS: { title: string; links: NavItem[] }[] = [
   {
     title: "Proof",
     links: [
+      { href: "/try", label: "Try it in 3 minutes" },
       { href: "/traction", label: "Live traction" },
       { href: "/explore", label: "Merchant directory" },
       { href: "/security", label: "Security" },

@@ -30,7 +30,12 @@ export default function Home() {
                 See how it works
               </Link>
             </div>
-            <p className="mt-4 text-sm text-ink-400">No wallet needed. Customers confirm with one tap. Veriga pays the network fees.</p>
+            <p className="mt-4 text-sm text-ink-400">
+              No wallet needed. Customers confirm with one tap. Veriga pays the network fees.{" "}
+              <Link href="/try" className="font-medium text-violet-700 hover:underline">
+                Try it in 3 minutes
+              </Link>
+            </p>
           </Reveal>
 
           <Reveal delay={0.15} className="relative mx-auto h-[470px] w-full max-w-[460px]">

@@ -13,6 +13,9 @@ import { Card, ScoreRing, TierBadge, Progress, Badge } from "@/components/ui";
 import { AreaChart, SplitBar } from "@/components/Sparkline";
 import { Money } from "@/components/site/mocks";
 import { Reveal } from "@/components/motion";
+import { useQuery } from "@tanstack/react-query";
+import { fetchLiveInsight } from "@/lib/api";
+import { InstallApp } from "@/components/InstallApp";
 
 const DAY = 86_400_000;
 
@@ -105,6 +108,10 @@ function Overview() {
             <Link href={`/m/${m.qieName ?? id.address}`} className="rounded-full bg-white px-4 py-2 text-sm font-semibold ring-1 ring-ink-200 hover:ring-ink-300">
               Public profile
             </Link>
+            <Link href="/poster" className="rounded-full bg-white px-4 py-2 text-sm font-semibold ring-1 ring-ink-200 hover:ring-ink-300">
+              Shop poster
+            </Link>
+            <InstallApp />
           </div>
         </div>
       </Reveal>
@@ -163,6 +170,8 @@ function Overview() {
           <CapitalMini />
         </Card>
       </div>
+
+      <WeeklyInsight id={id.address!} />
 
       <Card>
         <div className="flex items-baseline justify-between">
@@ -261,6 +270,44 @@ function Overview() {
         )}
       </Card>
     </div>
+  );
+}
+
+function WeeklyInsight({ id }: { id: string }) {
+  const q = useQuery({ queryKey: ["insight", id], queryFn: () => fetchLiveInsight(id), refetchInterval: 30_000 });
+  if (!q.data) return null;
+  const s = q.data.stats;
+  return (
+    <Card className="bg-brand-soft">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="max-w-2xl">
+          <div className="eyebrow">This week</div>
+          <ul className="mt-2 space-y-1.5 text-ink-800">
+            {q.data.sentences.map((line) => (
+              <li key={line} className="flex gap-2">
+                <span className="text-violet-600">•</span>
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="grid shrink-0 grid-cols-3 gap-3 text-center text-xs text-ink-500">
+          <div className="rounded-xl bg-white/80 px-3 py-2 ring-1 ring-violet-100">
+            <div className="font-display text-lg font-bold text-ink-900">{formatUSD(s.revenueThisWeek)}</div>
+            this week
+          </div>
+          <div className="rounded-xl bg-white/80 px-3 py-2 ring-1 ring-violet-100">
+            <div className="font-display text-lg font-bold text-ink-900">{s.uniqueCustomersThisWeek}</div>
+            customers
+          </div>
+          <div className="rounded-xl bg-white/80 px-3 py-2 ring-1 ring-violet-100">
+            <div className="font-display text-lg font-bold text-ink-900">{s.scoreDelta >= 0 ? `+${s.scoreDelta}` : s.scoreDelta}</div>
+            score change
+          </div>
+        </div>
+      </div>
+      <p className="mt-3 text-[11px] text-ink-500">Worked out from your recorded sales only. No AI guesses.</p>
+    </Card>
   );
 }
 
