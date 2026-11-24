@@ -26,10 +26,12 @@ Veriga demo: transcript
 
 [00:02:08] Cash sales build a reputation, but only money that really moved on-chain can raise a borrowing limit. And statements export in ISO 20022, the format banks already read.
 
-[00:02:21] Customers who do have crypto can pay in QUSDC, or in QIE that swaps through QIEDEX in the same payment, checked against the QIE price oracle.
+[00:02:21] Customers who do have crypto pay from their own wallet. They connect QIE Wallet in one tap, and pay in QUSDC, or in QIE that swaps through QIEDEX in the same payment, checked against the QIE price oracle. No wallet yet? There's a link to get one.
 
-[00:02:31] So where does the money come from? Anyone can lend QUSDC to shops, earn the fees they pay, and take it back when they want. Only lenders can move their money. Not even us.
+[00:02:40] And that money goes straight to the shop. Veriga never holds it. Ada sees it arrive on her dashboard, and she can send it to her own QIE Wallet, or to an exchange to turn it into naira. Her phone signs it, so only she can move it.
 
-[00:02:46] And you don't have to take our word for any of it. Here's that repayment on the QIE explorer.
+[00:02:58] So where does the money come from? Anyone can lend QUSDC to shops, earn the fees they pay, and take it back when they want. Only lenders can move their money. Not even us.
 
-[00:02:54] Veriga. Every sale becomes credit. Try it yourself at veriga-sigma.vercel.app.
+[00:03:12] And you don't have to take our word for any of it. Here's that repayment on the QIE explorer.
+
+[00:03:20] Veriga. Every sale becomes credit. Try it yourself at veriga-sigma.vercel.app.
