@@ -18,6 +18,8 @@ Veriga turns everyday sales into a credit record, and that record into small loa
 - **Anyone can lend.** Lenders deposit QUSDC into a lender vault, earn the fees shops pay, and withdraw whenever the money isn't out with shops. The vault is the pool's only admin, so nobody but a lender can move lender money. Not even us: the team wallet gave up its admin role on-chain.
 - **Lenders can check everything.** Each shop has a public profile under its .qie name, and statements export as CSV and ISO 20022 camt.053, a format banks already read.
 
+**A book nobody at the counter can change.** The first shops found a reason to use Veriga every day, long before any loan. Every sale is confirmed by the customer's own phone and locked on the chain, so nobody can quietly rub out a sale or change an amount later, and the owner sees exactly what was taken today, sale by sale. As one shop owner, Silverglam, put it: "no more fear of my workers stealing from me." The record that will one day get a shop a loan already protects its till today.
+
 A few things I'm really glad made it in:
 
 - **Your money.** Every shop sees the QUSDC and QIE in its own wallet and can send it anywhere: its QIE Wallet, family, or an exchange to turn it into naira. A phone-only shop signs the transfer itself, and if it has no QIE for the fee, Veriga adds a tiny capped top-up first.
@@ -49,13 +51,13 @@ A dishonest seller could invent customer keys, so I split evidence into two kind
 
 Six Solidity contracts (0.8.20, OpenZeppelin 5): MerchantRegistry, PaymentReceipts, WorkingCapitalPool, TrustScoreOracle, an ERC-2771 forwarder so merchants never need gas, and LenderVault, an ERC-4626 vault that is the pool's only admin. A cash sale carries two EIP-712 signatures, the seller's SaleOffer and the customer's SaleConfirmation, so the relayer can't record anything on its own.
 
-The backend (Express, Prisma, viem) runs inside the Next.js 14 app on Vercel's free tier, with Neon Postgres. It indexes every contract event, computes scores, builds statements and relays signed requests with an allowlist and rate limits. A daily cron syncs events, checkpoints scores on-chain and writes the Monday notes.
+The backend (Express, Prisma, viem) runs inside the Next.js 14 app on Vercel, with free Neon Postgres. It indexes every contract event, computes scores, builds statements and relays signed requests with an allowlist and rate limits. A daily cron syncs events, checkpoints scores on-chain and writes the Monday notes.
 
 ## Proof on mainnet
 
 I ran the whole loop with real money. A shop opened with no wallet and no gas. A customer confirmed a cash sale from their own phone. Another paid in QUSDC. Scores were checkpointed on-chain. The pool was funded, a shop took an advance of 0.60 QUSDC, and its next sale paid back 0.618 QUSDC, fee included, automatically in the same transaction. Then its limit doubled. After that, the pool's admin role moved to the lender vault and the team wallet renounced it, and the team came back in as an ordinary lender. The amounts are tiny on purpose, so the full cycle could be proven for almost nothing. Every transaction link is in the README.
 
-Since launch, shops run by people outside the team have opened on Veriga and recorded customer-confirmed sales. The traction page counts them live and leaves out every team and test wallet.
+Since launch, shops run by people outside the team have opened on Veriga and recorded customer-confirmed sales. Eight of them have sent feedback so far. Silverglam called it "a game changer for my business", and others said "very fast and swift", "really nice and user explanatory" and "well built". The traction page counts them live and leaves out every team and test wallet.
 
 Testing: 53 contract tests (including the lender vault's deposits, withdrawals, default write-downs and owner limits), 2 tests against a fork of live QIE mainnet (a real QIEDEX swap inside the oracle bound, and linking a real .qie name), and 90 backend tests.
 
