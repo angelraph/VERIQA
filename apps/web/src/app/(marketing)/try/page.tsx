@@ -39,7 +39,7 @@ const STEPS: { n: string; time: string; title: string; body: string; href: strin
     n: "4",
     time: "30 sec",
     title: "See the record a lender sees",
-    body: "Open Dashboard, then Public profile. The score breakdown, every receipt and its transaction are there. Tap \"Run the check in my browser\" to recompute the score's fingerprint yourself.",
+    body: "Open Home, then Public profile. The score breakdown, every receipt and its transaction are there. Tap \"Run the check in my browser\" to recompute the score's fingerprint yourself.",
     href: "/dashboard",
     cta: "Open my dashboard",
     check: "Score, receipts and statements are live.",
