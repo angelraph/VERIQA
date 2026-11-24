@@ -1,0 +1,71 @@
+Inspiration
+
+Meet Ada. She runs a small provisions shop. Rice, oil, soap, the same faces every morning. Some of her customers have bought from her for years, and on a good week she turns over more money than people think.
+
+Before the holidays she wants to stock up, so she asks her bank for a small loan. The answer is no. Not because her business is bad, but because nobody can see it. Her sales are cash, written in a notebook if they're written at all, and no bank lends against a notebook. Anyone can write anything in one.
+
+I kept thinking about Ada. Crypto payment apps don't help her, because they assume her customers already hold crypto, and most of them never will. Bookkeeping apps don't help either, because a record she types herself proves nothing to a stranger. What she's missing is a record of her sales that a lender can actually believe, made without asking her customers to own anything.
+
+That's Veriga.
+
+What it does
+
+A sale, the Veriga way. Ada types the price the way she says it out loud, two thousand five hundred naira, and her phone shows a QR code. Her customer scans it with any phone camera and taps "Yes, I paid". No app to download, no wallet, no fee. Two phones have now signed the same sale, so Ada can't invent it alone, and Veriga records it on QIE mainnet in seconds and pays the network fee. Ada sees a green tick. The cash stays in her hand, like it always has.
+
+From sales to a record. Every confirmed sale becomes a receipt on the blockchain that nobody can edit or backdate. Those receipts build Ada's trust score, and the score is open: any lender can rebuild it from the chain in their own browser and check it against a fingerprint stored on QIE. Her statements download as CSV, or as ISO 20022 camt.053, the format banks already read.
+
+Honest about what counts. A dishonest seller could invent fake customers, so Veriga treats evidence carefully. Cash sales confirmed by customers build Ada's reputation, but they are capped per customer and they never raise how much she can borrow. Only money that really moved on-chain does that. A lender can see exactly which is which.
+
+When her customers have crypto. Some customers do hold crypto. They connect QIE Wallet in one tap (Veriga switches the wallet to QIE Mainnet, or offers to add the network) and pay in QUSDC, or in QIE that swaps to QUSDC through QIEDEX inside the same payment, price-checked against the QIE Oracle. That money goes straight into Ada's own wallet. Veriga never holds it. Her dashboard shows it arriving, and she can send it to her QIE Wallet, to family, or to an exchange to turn it into naira. Her phone signs the transfer, so only she can move it.
+
+The loan. Once Ada has real on-chain sales from different customers, she can take a small working-capital advance. She never has to remember to repay it. While it's open, the contract quietly takes a share of each new payment and sends it back to the lenders, in the same transaction. Pay it back on time and her next limit doubles. If she defaults, it shows publicly on her record.
+
+Where the money comes from. Anyone can lend to shops like Ada's. Lenders put QUSDC into a lender vault, earn the fees shops pay, and withdraw whenever the money isn't out with a shop. The vault is the pool's only admin, so nobody but a lender can move lender money. Not even us: the team wallet gave up its admin role on-chain. While Veriga is new, the app caps each lender at $100 and asks them to confirm they understand the risks.
+
+The small things that make Ada keep using it. Veriga speaks her language: English, Nigerian Pidgin, Yoruba, Igbo or Hausa. She prints a QR poster for her counter. It installs on her phone like an app. Every Monday she gets a short note about her week, worked out only from real sales, with no AI guessing. Her Customers page shows who keeps coming back, and she can give each customer a name like "Mama Ngozi" that stays only on her phone and never touches the blockchain. And a new seller, or a judge, can try the whole flow on one phone before asking a real customer.
+
+How we built it
+
+Six Solidity contracts on QIE mainnet, all source-verified: MerchantRegistry, PaymentReceipts, WorkingCapitalPool, TrustScoreOracle, an ERC-2771 forwarder so shops never need gas, and LenderVault, an ERC-4626 vault that runs the lending pool. A cash sale carries two EIP-712 signatures, the seller's offer and the customer's confirmation, so Veriga's relayer can't record anything on its own.
+
+The app is Next.js with the backend built in (Express, Prisma, viem), on Vercel's free tier with a free Postgres database. It reads every contract event, works out scores, builds statements, and relays signed requests within strict limits. A daily job syncs the chain, saves score checkpoints on QIE, and writes the Monday notes.
+
+Veriga uses QIE end to end: mainnet, QUSDC, QIEDEX, the QIE Oracle, QIE ID names (pay links work as name.qie), QIE Wallet and ISO 20022 statements. QIE Pass is wired in and waiting on partner keys.
+
+Proof that it's real
+
+I ran Ada's whole story on mainnet with real money. A shop opened with no wallet and no gas. A customer confirmed a cash sale from their own phone. Another paid in QUSDC. Scores were checkpointed on-chain. A shop borrowed 0.60 QUSDC, and its very next sale paid back 0.618, fee included, automatically in the same transaction. Then its limit doubled. After that, the pool was handed to the lender vault and the team gave up control for good. The amounts are tiny on purpose, so the full cycle could be proven for almost nothing. Every transaction is linked in the README.
+
+Since launch, shops run by people outside the team have opened on Veriga and recorded real customer-confirmed sales. The traction page counts them live and leaves out every team and test wallet.
+
+Behind it: 53 contract tests, 2 tests against a copy of live QIE mainnet, and 90 backend tests.
+
+Challenges we ran into
+
+The gas that lied. QIE's gas estimates come in low for calls that go through a forwarder, so early transactions quietly ran out of gas while the app showed success. Now every action sets its own gas limit, and any failure shows up clearly to the user.
+
+Fake customers. It took a few rounds to find a rule I could defend: cash builds reputation, and only settled money builds borrowing power.
+
+Keeping it free. My first host shut down after a trial, so I folded everything into one free deployment. Nothing in Veriga needs a paid server.
+
+Counting honestly. It would have been easy to count our own test shops as users. The traction page doesn't.
+
+What we're proud of
+
+A customer with no crypto can create a blockchain receipt with one tap. A loan on mainnet paid itself back out of a customer's payment. Anyone can check a shop's score themselves instead of trusting us. And a seller who speaks Yoruba, Igbo, Hausa or Pidgin can use it in her own language.
+
+What we learned
+
+The hard part of on-chain credit isn't the lending contract. It's deciding which evidence deserves trust, and saying out loud which doesn't. Being strict about that made the product simpler, not harder.
+
+What's next
+
+Posters on real counters with a first group of shops. QIE Pass switched on once partner keys arrive. Supplier payouts through the QIE ISO 20022 gateway. Outside lenders, so pool limits can grow. And an external audit.
+
+Honest limits
+
+The pool runs small demo limits for now, with a $1 first advance. Customer keys can be invented, which is why cash sales are capped and never count toward borrowing. The score updater is a trusted role, and every checkpoint carries a fingerprint anyone can check. QIE Pass needs partner keys. The translations were drafted with AI help and need native speakers to review them. There's been no external audit yet.
+
+Demo video: https://youtu.be/zRwHxhu5MFI
+Try it in 3 minutes: https://veriga-sigma.vercel.app/try
+Code: https://github.com/angelraph/VERIQA
