@@ -4,6 +4,7 @@ import { Ribbon, LiveTicker, StatsBand, FeatureTabs, CtaBand, StackMarquee } fro
 import { PhoneConfirmMock, ReceiptMock, PayMock, CapitalMock, StatementMock, ScoreMock, VerifyMock, SalesChartMock, CodeMock } from "@/components/site/mocks";
 import { FAQ_ITEMS } from "@/components/site/faq";
 import { Faq } from "@/components/site/FaqList";
+import { Testimonials } from "@/components/site/Testimonials";
 
 export default function Home() {
   return (
@@ -252,6 +253,7 @@ export default function Home() {
         </div>
       </section>
 
+      <Testimonials />
       <CtaBand />
     </>
   );

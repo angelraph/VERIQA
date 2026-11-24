@@ -12,6 +12,7 @@ import { PageHero } from "@/components/site/sections";
 import { Stat, LiveDot, Card } from "@/components/ui";
 import { AreaChart, Bars, SplitBar } from "@/components/Sparkline";
 import { CountUp, Reveal } from "@/components/motion";
+import { Testimonials } from "@/components/site/Testimonials";
 
 export default function TractionPage() {
   const t = useQuery({ queryKey: ["traction"], queryFn: fetchTraction, refetchInterval: 10_000 });
@@ -75,6 +76,7 @@ export default function TractionPage() {
         </div>
       </section>
 
+      <Testimonials compact title="What the first shops say" />
       <section className="bg-canvas py-16">
         <div className="container-page grid gap-4 md:grid-cols-2">
           <Reveal>
