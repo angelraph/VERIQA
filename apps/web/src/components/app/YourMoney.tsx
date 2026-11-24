@@ -5,6 +5,7 @@ import { useReadContract, useBalance, useWriteContract, usePublicClient } from "
 import { createWalletClient, encodeFunctionData, formatEther, formatUnits, getAddress, http, isAddress, parseUnits } from "viem";
 import { erc20Abi, QUSDC_ADDRESS, activeChain, explorerAddress } from "@veriga/shared";
 import { useIdentity } from "@/lib/identity";
+import { useEnsureQie } from "@/lib/qieChain";
 import { API_BASE } from "@/lib/config";
 import { formatUSD } from "@/lib/money";
 import { Card, Button, ErrorText, TxLink } from "@/components/ui";
@@ -19,6 +20,7 @@ export function YourMoney() {
   const id = useIdentity();
   const pc = usePublicClient();
   const { writeContractAsync } = useWriteContract();
+  const { ensureQie } = useEnsureQie();
   const addr = id.address;
 
   const qusdc = useReadContract({
@@ -54,6 +56,7 @@ export function YourMoney() {
       const dest = getAddress(to.trim());
       let hash: `0x${string}`;
       if (id.mode === "wallet") {
+        await ensureQie();
         setStep("Confirm in your wallet");
         hash = await writeContractAsync({ address: QUSDC_ADDRESS, abi: erc20Abi, functionName: "transfer", args: [dest, units], gas: 120_000n });
       } else {

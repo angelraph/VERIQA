@@ -9,6 +9,7 @@ import { ADDR } from "@/lib/config";
 import { formatUSD } from "@/lib/money";
 import { Card, Stat, Button, ErrorText, Badge } from "@/components/ui";
 import { ConnectWalletButton } from "@/components/ConnectWalletButton";
+import { useEnsureQie } from "@/lib/qieChain";
 
 const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000" as const;
 const usd = (v?: bigint) => (v === undefined ? 0 : Number(formatUnits(v, 6)));
@@ -34,6 +35,7 @@ export default function PoolAdminPage() {
   const { address } = useAccount();
   const pc = usePublicClient();
   const { writeContractAsync } = useWriteContract();
+  const { ensureQie } = useEnsureQie();
   const base = { address: ADDR.pool, abi: workingCapitalPoolAbi } as const;
 
   const reads = useReadContracts({
@@ -115,6 +117,7 @@ export default function PoolAdminPage() {
     setDone(null);
     setBusy(label);
     try {
+      await ensureQie();
       const hash = await fn();
       const rc = await pc!.waitForTransactionReceipt({ hash });
       if (rc.status !== "success") throw new Error("The transaction reverted on QIE. Nothing was changed.");

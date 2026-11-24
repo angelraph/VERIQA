@@ -6,6 +6,7 @@ import { usePublicClient } from "wagmi";
 import type { PrivateKeyAccount } from "viem/accounts";
 import { getDeviceAccount, getOrCreateDeviceAccount } from "./deviceKey";
 import { relayCall } from "./relay";
+import { useEnsureQie } from "./qieChain";
 
 export type IdentityMode = "wallet" | "device";
 
@@ -18,6 +19,7 @@ export function useIdentity() {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const [device, setDevice] = useState<PrivateKeyAccount | null>(null);
+  const { ensureQie } = useEnsureQie();
 
   useEffect(() => {
     setDevice(getDeviceAccount());
@@ -37,6 +39,7 @@ export function useIdentity() {
     async (to: `0x${string}`, data: `0x${string}`, gas?: bigint): Promise<`0x${string}`> => {
       let hash: `0x${string}`;
       if (mode === "wallet" && walletClient) {
+        await ensureQie();
         // QIE's gas estimates run low for some calls, so pad them generously.
         let limit = 600_000n;
         try {
@@ -54,7 +57,7 @@ export function useIdentity() {
       if (receipt && receipt.status !== "success") throw new Error("The transaction reverted on QIE. Nothing was changed.");
       return hash;
     },
-    [mode, walletClient, device, createDevice, publicClient]
+    [mode, walletClient, device, createDevice, publicClient, ensureQie]
   );
 
   const signTypedData = useCallback(

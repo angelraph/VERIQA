@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useEnsureQie } from "@/lib/qieChain";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount, useBalance, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
@@ -82,6 +83,8 @@ export default function PayPage({ params }: { params: { id: string } }) {
   });
 
   const approveTx = useWriteContract();
+  const { ensureQie } = useEnsureQie();
+  const [netError, setNetError] = useState<string | null>(null);
   const payTx = useWriteContract();
   const approveRc = useWaitForTransactionReceipt({ hash: approveTx.data });
   const payRc = useWaitForTransactionReceipt({ hash: payTx.data });
@@ -94,8 +97,20 @@ export default function PayPage({ params }: { params: { id: string } }) {
   const qieValue = quote.data && maxQie.data !== undefined ? (BigInt(quote.data.maxAmountIn) < (maxQie.data as bigint) ? BigInt(quote.data.maxAmountIn) : (maxQie.data as bigint)) : undefined;
   const qieOutOfBounds = quote.data && maxQie.data !== undefined && BigInt(quote.data.amountIn) > (maxQie.data as bigint);
 
-  function pay() {
+  async function onQieOrSay(): Promise<boolean> {
+    setNetError(null);
+    try {
+      await ensureQie();
+      return true;
+    } catch {
+      setNetError("Your wallet needs to be on QIE Mainnet. Approve the network switch in your wallet, or add QIE Mainnet there.");
+      return false;
+    }
+  }
+
+  async function pay() {
     if (!merchantAddr) return;
+    if (!(await onQieOrSay())) return;
     if (method === "qusdc") {
       payTx.writeContract({ address: ADDR.receipts, abi: paymentReceiptsAbi, functionName: "payInvoice", args: [merchantAddr, units, invoiceRef], gas: 900_000n });
     } else if (qieValue) {
@@ -218,7 +233,9 @@ export default function PayPage({ params }: { params: { id: string } }) {
             <Button
               className="w-full"
               loading={approveTx.isPending || approveRc.isLoading}
-              onClick={() => approveTx.writeContract({ address: QUSDC_ADDRESS, abi: erc20Abi, functionName: "approve", args: [ADDR.receipts, units] })}
+              onClick={async () => {
+                if (await onQieOrSay()) approveTx.writeContract({ address: QUSDC_ADDRESS, abi: erc20Abi, functionName: "approve", args: [ADDR.receipts, units], gas: 120_000n });
+              }}
             >
               Step 1 of 2 · Allow QUSDC
             </Button>
@@ -233,6 +250,7 @@ export default function PayPage({ params }: { params: { id: string } }) {
             </Button>
           )}
           <ErrorText error={approveTx.error ?? payTx.error} />
+            {netError && <p className="mt-2 text-sm text-rose-600">{netError}</p>}
         </div>
       </Card>
     </div>

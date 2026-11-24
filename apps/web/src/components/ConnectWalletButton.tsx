@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { QIE_WALLET_RDNS } from "@/lib/wagmi";
+import { qieMainnet } from "@veriga/shared";
+import { useEnsureQie } from "@/lib/qieChain";
 
 const QIE_WALLET_URL = "https://qiewallet.me";
 
@@ -19,7 +21,26 @@ export function ConnectWalletButton({ compact = false }: { compact?: boolean }) 
   const { disconnect } = useDisconnect();
   const [open, setOpen] = useState(false);
   const [hasInjected, setHasInjected] = useState(false);
+  const { onQie, ensureQie } = useEnsureQie();
+  const [switchError, setSwitchError] = useState<string | null>(null);
   useEffect(() => setHasInjected(typeof window !== "undefined" && Boolean((window as any).ethereum)), []);
+
+  if (isConnected && address && !onQie) {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => {
+            setSwitchError(null);
+            ensureQie().catch((e) => setSwitchError(e?.shortMessage ?? "Your wallet didn't switch. Open it and choose QIE Mainnet."));
+          }}
+          className="rounded-full bg-amber-100 px-3.5 py-2 text-sm font-semibold text-amber-900 ring-1 ring-amber-300 hover:bg-amber-200"
+        >
+          Switch to QIE network
+        </button>
+        {switchError && <p className="absolute right-0 mt-1 w-60 text-xs text-rose-600">{switchError}</p>}
+      </div>
+    );
+  }
 
   if (isConnected && address) {
     return (
@@ -37,7 +58,7 @@ export function ConnectWalletButton({ compact = false }: { compact?: boolean }) 
   return (
     <div className="relative">
       <button
-        onClick={() => (usable.length === 1 && hasQie ? connect({ connector: usable[0] }) : setOpen((v) => !v))}
+        onClick={() => (usable.length === 1 && hasQie ? connect({ connector: usable[0], chainId: qieMainnet.id }) : setOpen((v) => !v))}
         disabled={isPending}
         className="rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-ink-900 ring-1 ring-ink-200 transition hover:ring-violet-300 disabled:opacity-50"
       >
@@ -63,7 +84,7 @@ export function ConnectWalletButton({ compact = false }: { compact?: boolean }) 
               key={c.uid}
               onClick={() => {
                 setOpen(false);
-                connect({ connector: c });
+                connect({ connector: c, chainId: qieMainnet.id });
               }}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-canvas"
             >

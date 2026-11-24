@@ -11,6 +11,7 @@ import { formatUSD } from "@/lib/money";
 import { fetchCreditBook, decodeProfile } from "@/lib/api";
 import { Card, Stat, Button, ErrorText, Badge, TxLink, Empty } from "@/components/ui";
 import { ConnectWalletButton } from "@/components/ConnectWalletButton";
+import { useEnsureQie } from "@/lib/qieChain";
 import { Reveal } from "@/components/motion";
 
 const usd = (v?: bigint) => (v === undefined ? 0 : Number(formatUnits(v, 6)));
@@ -32,6 +33,7 @@ export function LendClient() {
   const { address } = useAccount();
   const pc = usePublicClient();
   const { writeContractAsync } = useWriteContract();
+  const { ensureQie } = useEnsureQie();
   const v = { address: vault, abi: lenderVaultAbi } as const;
 
   const reads = useReadContracts({
@@ -89,6 +91,7 @@ export function LendClient() {
     setDone(null);
     setBusy(what);
     try {
+      await ensureQie();
       const hash = await fn();
       const rc = await pc!.waitForTransactionReceipt({ hash });
       if (rc.status !== "success") throw new Error("The transaction reverted on QIE. Nothing was moved.");
