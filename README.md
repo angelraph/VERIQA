@@ -88,7 +88,7 @@ That third row is the important one. A dishonest merchant can invent customer ke
 ## How it fits together
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph Phones
     S["Seller phone<br/>key in the browser"]
     C["Customer phone<br/>no wallet needed"]
