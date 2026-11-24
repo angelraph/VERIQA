@@ -42,3 +42,6 @@ apps/indexer/prisma/schema.sqlite.prisma
 
 # Local demo wallets (never commit)
 contracts/.demo-wallets.json
+
+# Demo video build outputs
+docs/demo-video/out/

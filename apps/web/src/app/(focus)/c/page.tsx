@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { decodeOffer, confirmSale, type SaleOffer } from "@/lib/relay";
-import { getOrCreateDeviceAccount, getDeviceAccount } from "@/lib/deviceKey";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import { getOrCreateDeviceAccount, getDeviceAccount, getOrCreateTestCustomerAccount } from "@/lib/deviceKey";
 import { fetchMerchant, decodeProfile } from "@/lib/api";
 import { formatUSD, formatLocal } from "@/lib/money";
 import { Button, Card, ErrorText, TxLink, Badge, Spinner } from "@/components/ui";
@@ -67,7 +66,7 @@ export default function ConfirmSalePage() {
     try {
       // On the seller's own phone, a throwaway key stands in for the customer,
       // so a judge or a new seller can try the whole flow on one device.
-      const customer = asTestCustomer ? privateKeyToAccount(generatePrivateKey()) : getOrCreateDeviceAccount();
+      const customer = asTestCustomer ? getOrCreateTestCustomerAccount() : getOrCreateDeviceAccount();
       const { txHash } = await confirmSale(customer, offer!);
       setTxHash(txHash);
       setState("done");
