@@ -89,50 +89,20 @@ That third row is the important one. A dishonest merchant can invent customer ke
 
 ```mermaid
 flowchart TB
-  subgraph Phones
-    S["Seller phone<br/>key in the browser"]
-    C["Customer phone<br/>no wallet needed"]
-    W["QIE Wallet<br/>customers with crypto"]
-  end
-
-  subgraph Vercel["Veriga on Vercel (free tier)"]
-    WEB["Next.js app<br/>sell, confirm, pay, profiles"]
-    API["API at /api<br/>relayer, indexer, scores, statements"]
-    DB[("Neon Postgres")]
-    CRON["Daily cron<br/>sync, score checkpoints, Monday insights"]
-  end
-
-  subgraph QIE["QIE mainnet"]
-    FWD["VerigaForwarder"]
-    REG["MerchantRegistry"]
-    PR["PaymentReceipts"]
-    POOL["WorkingCapitalPool"]
-    TSO["TrustScoreOracle"]
-    DEX["QIEDEX router"]
-    ORA["QIE/USD oracle"]
-    NAMES["QIE ID names"]
-    QUSDC["QUSDC"]
-  end
-
-  S -- "signed sale offer (QR)" --> C
-  C -- "co-signature" --> WEB
-  S -- "signed requests" --> WEB
-  WEB --> API
-  API -- "pays gas" --> FWD
-  FWD --> REG
-  FWD --> PR
-  W -- "payInvoice / payWithQIE" --> PR
-  PR -- "swap QIE to QUSDC" --> DEX
-  PR -- "price check" --> ORA
-  REG -- "verify .qie name" --> NAMES
-  PR -- "share of each sale while an advance is open" --> POOL
-  POOL --- QUSDC
-  API -- "reads events" --> PR
-  API -- "reads events" --> POOL
-  API --> DB
-  CRON --> API
-  API -- "publishScore + inputs hash" --> TSO
-  POOL -- "minimum score" --> TSO
+  S["Seller phone<br/>key lives in the browser"] -- "signed sale offer, shown as a QR" --> C["Customer phone<br/>no wallet, no app"]
+  C -- "co-signature" --> API["Veriga on Vercel<br/>web app, relayer, indexer, Neon Postgres"]
+  S -- "signed shop actions" --> API
+  API -- "pays the gas" --> FWD["VerigaForwarder"]
+  FWD --> REG["MerchantRegistry"]
+  FWD --> PR["PaymentReceipts"]
+  W["Customer with QIE Wallet"] -- "pays in QUSDC, or QIE" --> PR
+  PR -- "swaps QIE to QUSDC, price checked" --> DEX["QIEDEX router + QIE/USD oracle"]
+  REG -- "checks the .qie name both ways" --> N["QIE ID names"]
+  PR -- "share of each sale repays an open advance" --> POOL["WorkingCapitalPool<br/>QUSDC"]
+  PR -. "events" .-> API
+  API -- "daily score checkpoint + inputs hash" --> T["TrustScoreOracle"]
+  T -- "minimum score to borrow" --> POOL
+  API --> L["Public profiles, statements, traction<br/>what lenders check"]
 ```
 
 A sale, step by step:
