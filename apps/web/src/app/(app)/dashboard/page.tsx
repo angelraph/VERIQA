@@ -16,6 +16,7 @@ import { Reveal } from "@/components/motion";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLiveInsight } from "@/lib/api";
 import { InstallApp } from "@/components/InstallApp";
+import { YourMoney } from "@/components/app/YourMoney";
 
 const DAY = 86_400_000;
 
@@ -172,6 +173,7 @@ function Overview() {
       </div>
 
       <WeeklyInsight id={id.address!} />
+      <YourMoney />
 
       <Card>
         <div className="flex items-baseline justify-between">

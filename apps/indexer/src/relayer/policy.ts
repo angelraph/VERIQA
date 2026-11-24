@@ -56,3 +56,22 @@ export class RateLimiter {
     return true;
   }
 }
+
+/// Gas top-up for a phone-only shop that wants to move its own QUSDC out.
+/// A shop key holds no QIE, so it cannot pay for its own transfer. The relayer
+/// sends a tiny amount only when the address is a registered shop, holds
+/// enough QUSDC to be worth moving, and is nearly out of QIE. The state lives
+/// on-chain, so there is nothing to store and nothing worth farming: each
+/// top-up is a fraction of a cent and only refills an empty balance.
+export const GAS_TOPUP_WEI = 2_000_000_000_000_000n; // 0.002 QIE, dozens of transfers
+export const GAS_TOPUP_BELOW_WEI = 300_000_000_000_000n; // only when under 0.0003 QIE
+export const GAS_TOPUP_MIN_QUSDC = 100_000n; // 0.10 QUSDC
+
+export function gasTopUpDecision(input: { isMerchant: boolean; qieWei: bigint; qusdcUnits: bigint }):
+  | { ok: true; amountWei: bigint }
+  | { ok: false; reason: string } {
+  if (!input.isMerchant) return { ok: false, reason: "Only registered shops can get a gas top-up." };
+  if (input.qusdcUnits < GAS_TOPUP_MIN_QUSDC) return { ok: false, reason: "There's less than $0.10 to move, so no top-up is needed." };
+  if (input.qieWei >= GAS_TOPUP_BELOW_WEI) return { ok: false, reason: "This shop already has enough QIE for its transfer." };
+  return { ok: true, amountWei: GAS_TOPUP_WEI };
+}

@@ -63,3 +63,22 @@ describe("normalizePrivateKey", () => {
     expect(normalizePrivateKey("twelve seed phrase words")).toBeNull();
   });
 });
+
+import { gasTopUpDecision, GAS_TOPUP_WEI, GAS_TOPUP_BELOW_WEI, GAS_TOPUP_MIN_QUSDC } from "../src/relayer/policy";
+
+describe("gas top-up policy", () => {
+  const shop = { isMerchant: true, qieWei: 0n, qusdcUnits: 5_000_000n };
+  it("tops up a registered shop with QUSDC and no QIE", () => {
+    expect(gasTopUpDecision(shop)).toEqual({ ok: true, amountWei: GAS_TOPUP_WEI });
+  });
+  it("refuses addresses that are not shops", () => {
+    expect(gasTopUpDecision({ ...shop, isMerchant: false }).ok).toBe(false);
+  });
+  it("refuses when there is too little QUSDC to be worth moving", () => {
+    expect(gasTopUpDecision({ ...shop, qusdcUnits: GAS_TOPUP_MIN_QUSDC - 1n }).ok).toBe(false);
+  });
+  it("refuses when the shop already has QIE, so it can't be farmed", () => {
+    expect(gasTopUpDecision({ ...shop, qieWei: GAS_TOPUP_BELOW_WEI }).ok).toBe(false);
+    expect(gasTopUpDecision({ ...shop, qieWei: GAS_TOPUP_BELOW_WEI - 1n }).ok).toBe(true);
+  });
+});

@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { createWalletClient, http, isAddress, isHex, getAddress, formatEther, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { activeChain, paymentReceiptsAbi, verigaForwarderAbi, contractAddresses } from "@veriga/shared";
+import { activeChain, paymentReceiptsAbi, verigaForwarderAbi, merchantRegistryAbi, erc20Abi, contractAddresses, QUSDC_ADDRESS } from "@veriga/shared";
 import { publicClient } from "../chainClient";
-import { checkForwardCall, RateLimiter, type Target } from "./policy";
+import { checkForwardCall, RateLimiter, gasTopUpDecision, type Target } from "./policy";
 import { normalizePrivateKey } from "../keys";
 
 /// Gas relayer: merchants and customers sign with keys on their phones, and the
@@ -202,5 +202,47 @@ relayRouter.post("/sale", async (req, res) => {
     res.json({ txHash: hash });
   } catch (err: any) {
     res.status(422).json({ error: err?.shortMessage ?? "sale would revert" });
+  }
+});
+
+/// Tiny QIE top-up so a phone-only shop can move its own QUSDC out. The shop's
+/// phone signs the transfer itself; this only covers its gas. See
+/// gasTopUpDecision for why it is safe to leave open.
+relayRouter.post("/gas", async (req, res) => {
+  const client = relayerClient();
+  if (!client || !contractAddresses.merchantRegistry) {
+    res.status(503).json({ error: "relayer not configured" });
+    return;
+  }
+  const addr = req.body?.address;
+  if (!isAddress(addr)) {
+    res.status(400).json({ error: "bad address" });
+    return;
+  }
+  const wallet = getAddress(addr);
+  if (!perSigner.take(`gas:${wallet}`) || !global.take("all")) {
+    res.status(429).json({ error: "rate limited" });
+    return;
+  }
+  try {
+    const [isMerchant, qieWei, qusdcUnits] = await Promise.all([
+      publicClient.readContract({ address: contractAddresses.merchantRegistry, abi: merchantRegistryAbi, functionName: "isMerchant", args: [wallet] }),
+      publicClient.getBalance({ address: wallet }),
+      publicClient.readContract({ address: QUSDC_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: [wallet] }),
+    ]);
+    const decision = gasTopUpDecision({ isMerchant: Boolean(isMerchant), qieWei, qusdcUnits: qusdcUnits as bigint });
+    if (!decision.ok) {
+      res.status(403).json({ error: decision.reason });
+      return;
+    }
+    const hash = await client.sendTransaction({ to: wallet, value: decision.amountWei, gas: 21_000n });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 60_000 });
+    if (receipt.status !== "success") {
+      res.status(422).json({ error: "The top-up did not go through.", txHash: hash });
+      return;
+    }
+    res.json({ txHash: hash, amountQIE: formatEther(decision.amountWei) });
+  } catch (err: any) {
+    res.status(502).json({ error: err?.shortMessage ?? "Could not reach QIE. Try again." });
   }
 });
