@@ -12,13 +12,16 @@ Veriga turns everyday sales into a credit record, and that record into small loa
 
 - **The seller shows a QR.** She types the amount in her own currency (naira, cedis, shillings, rand or dollars). Her phone signs a one-time sale offer, even with no signal.
 - **The customer taps "Yes, I paid".** They scan it with any phone camera. No app, no wallet, no fee. Their phone adds its own signature, Veriga's relayer records the receipt on QIE mainnet and pays the gas, and the seller sees a green tick in seconds.
-- **Customers with crypto pay directly** in QUSDC, or in QIE that swaps to QUSDC through QIEDEX inside the same transaction, checked against the QIE Oracle.
+- **Customers with crypto pay from their own wallet.** They connect QIE Wallet (the app switches it to QIE Mainnet, or offers to add the network) and pay in QUSDC, or in QIE that swaps to QUSDC through QIEDEX inside the same transaction, checked against the QIE Oracle. The money lands straight in the shop's own wallet. Veriga never holds it.
 - **Every receipt feeds an open trust score.** Anyone can rebuild it from chain data, and the hash of its inputs is checkpointed on-chain.
 - **The score unlocks working capital.** Advances are sized from real on-chain sales only. While one is open, the contract sends a share of every new payment back to the pool automatically, in the same transaction. Repay on time and the next limit doubles. Defaults are public.
 - **Anyone can lend.** Lenders deposit QUSDC into a lender vault, earn the fees shops pay, and withdraw whenever the money isn't out with shops. The vault is the pool's only admin, so nobody but a lender can move lender money. Not even us: the team wallet gave up its admin role on-chain.
 - **Lenders can check everything.** Each shop has a public profile under its .qie name, and statements export as CSV and ISO 20022 camt.053, a format banks already read.
 
 A few things I'm really glad made it in:
+
+- **Your money.** Every shop sees the QUSDC and QIE in its own wallet and can send it anywhere: its QIE Wallet, family, or an exchange to turn it into naira. A phone-only shop signs the transfer itself, and if it has no QIE for the fee, Veriga adds a tiny capped top-up first.
+- **Customers.** Each customer's purchases, spend, first and last visit, and who the regulars are. The shop can name customers ("Mama Ngozi"), and those names stay only on the shop's phone, never on the blockchain.
 
 - **Try it on one phone.** A new seller (or a judge) can play both sides on one device before asking a real customer.
 - **Five languages.** English, Nigerian Pidgin, Yoruba, Igbo and Hausa on the screens sellers and customers use most.
@@ -90,4 +93,4 @@ The hard part of on-chain credit isn't the lending contract. It's deciding which
 - The translations were drafted with AI help and need native speakers to check them.
 - No external audit yet.
 
-**Try it:** https://veriga-sigma.vercel.app/try · **Code:** https://github.com/angelraph/VERIQA
+**Demo video:** https://youtu.be/zRwHxhu5MFI · **Try it:** https://veriga-sigma.vercel.app/try · **Code:** https://github.com/angelraph/VERIQA
