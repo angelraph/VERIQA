@@ -1,7 +1,8 @@
 import { QUSDC_ADDRESS, QUSDC_DECIMALS } from "./chain";
 export { QUSDC_ADDRESS, QUSDC_DECIMALS };
 
-const env = (a?: string, b?: string) => ((a ?? b ?? "") as `0x${string}`);
+// Trimmed, because values pasted into a hosting dashboard often carry a stray newline.
+const env = (a?: string, b?: string) => ((a ?? b ?? "").trim() as `0x${string}`);
 
 /// Single source of truth for deployed Veriga addresses, read from env so the
 /// indexer (MERCHANT_REGISTRY_ADDRESS...) and the web app

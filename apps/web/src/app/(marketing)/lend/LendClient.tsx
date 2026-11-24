@@ -16,6 +16,9 @@ import { Reveal } from "@/components/motion";
 const usd = (v?: bigint) => (v === undefined ? 0 : Number(formatUnits(v, 6)));
 // Shares carry 12 decimals (6 for QUSDC plus a 6-decimal safety offset).
 const ONE_SHARE = 10n ** 12n;
+// While the contracts are new and unaudited, the app keeps each wallet's
+// lending small. The contract itself has no cap; this is a guard in the app.
+const BETA_CAP = 100_000_000n; // $100 in QUSDC base units
 
 const STATUS: Record<string, { label: string; tone: "mint" | "violet" | "rose" | "amber" }> = {
   open: { label: "Being repaid", tone: "violet" },
@@ -69,6 +72,7 @@ export function LendClient() {
   const book = useQuery({ queryKey: ["credit-book"], queryFn: fetchCreditBook, refetchInterval: 30_000 });
 
   const [amount, setAmount] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState<"lend" | "withdraw" | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [done, setDone] = useState<{ what: string; hash: `0x${string}` } | null>(null);
@@ -122,6 +126,10 @@ export function LendClient() {
   }
 
   const growth = sharePrice ? Number(formatUnits(sharePrice, 6)) : 1;
+  const lentSoFar = (position.data as bigint | undefined) ?? 0n;
+  const roomLeft = lentSoFar >= BETA_CAP ? 0n : BETA_CAP - lentSoFar;
+  const maxLend = (wallet ?? 0n) < roomLeft ? (wallet ?? 0n) : roomLeft;
+  const overCap = units > roomLeft;
 
   return (
     <>
@@ -185,15 +193,27 @@ export function LendClient() {
                   />
                 </div>
                 <div className="mt-2 flex gap-3 text-xs">
-                  <button type="button" className="link" onClick={() => setAmount(formatUnits(wallet ?? 0n, 6))}>
-                    Lend all
+                  <button type="button" className="link" onClick={() => setAmount(formatUnits(maxLend, 6))}>
+                    Lend max
                   </button>
                   <button type="button" className="link" onClick={() => setAmount(formatUnits(canWithdraw ?? 0n, 6))}>
                     Take out max
                   </button>
                 </div>
+                {overCap && (
+                  <p className="mt-2 text-sm text-amber-700">
+                    While Veriga is new, each wallet can lend up to {formatUSD(usd(BETA_CAP))}. You can add {formatUSD(usd(roomLeft))} more.
+                  </p>
+                )}
+                <label className="mt-4 flex items-start gap-2 text-sm text-ink-600">
+                  <input type="checkbox" className="mt-1" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+                  <span>
+                    I understand shops can repay late or not at all, money out with shops comes back only as they sell, and these contracts have not
+                    been audited yet. I&apos;m lending only what I can afford to wait for.
+                  </span>
+                </label>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Button onClick={lend} loading={busy === "lend"} disabled={busy !== null || units === 0n || units > (wallet ?? 0n)}>
+                  <Button onClick={lend} loading={busy === "lend"} disabled={busy !== null || !agreed || units === 0n || units > (wallet ?? 0n) || overCap}>
                     Lend
                   </Button>
                   <Button variant="secondary" onClick={withdraw} loading={busy === "withdraw"} disabled={busy !== null || units === 0n || units > (canWithdraw ?? 0n)}>
@@ -233,6 +253,7 @@ export function LendClient() {
               <li>A shop can pay back late or not at all. Late advances are written down, so everyone shares the loss.</li>
               <li>Money out with shops can&apos;t be withdrawn until it comes back through their sales.</li>
               <li>QUSDC has an issuer. The contracts have not had an external audit yet.</li>
+              <li>To keep early losses small, the app lets each wallet lend up to $100 while Veriga is in beta.</li>
             </ul>
             <a className="link mt-5 inline-block text-sm" href={explorerAddress(vault)} target="_blank" rel="noreferrer">
               Read the vault contract on the QIE explorer

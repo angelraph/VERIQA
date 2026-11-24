@@ -7,7 +7,8 @@
     "MerchantRegistry": "0x6005A1e73A6cCd2759eC5bC9f74F80997393cc22",
     "TrustScoreOracle": "0x857c34aCcD229E270b9790dfB6647D6a5fC9BE81",
     "WorkingCapitalPool": "0xbeb5d332a5C6dDeb117f3cC47fAb74F41f8A4ECA",
-    "PaymentReceipts": "0x4e1A43B27F83532d1547C64b353Cb23CDd7A490E"
+    "PaymentReceipts": "0x4e1A43B27F83532d1547C64b353Cb23CDd7A490E",
+    "LenderVault": "0x9bDDd37A74B26DEE53Ab1911a171Dc51ecefc647"
   },
   "integrations": {
     "qusdc": "0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5",
@@ -41,6 +42,11 @@
       "0x6F859A4FC901873a85b8691D25A941A3fe605DBF",
       259200,
       300
+    ],
+    "LenderVault": [
+      "0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5",
+      "0xbeb5d332a5C6dDeb117f3cC47fAb74F41f8A4ECA",
+      "0xd1f63Cf7c1C9Bbb577131615B84BB3981e6Efc14"
     ]
   }
 }

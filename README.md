@@ -46,7 +46,8 @@ Crypto payment apps don't fix this, because they need the customer to already ho
 3. **Customers with crypto pay directly** in QUSDC, or in QIE that swaps to QUSDC through QIEDEX in the same transaction, checked against the QIE Oracle.
 4. **Every receipt feeds an open trust score.** On-chain sales weigh most. Cash sales count less and are capped per customer, so fake customers buy very little.
 5. **The score unlocks working capital.** Advances are sized from settled on-chain sales only. While one is open, the contract sends a share of every new sale back to the pool automatically. Each loan repaid on time doubles the next limit. Defaults are public.
-6. **Lenders check it all themselves.** Every shop has a public profile under its `.qie` name, a score anyone can recompute from chain data, and statements in CSV and ISO 20022 camt.053.
+6. **Anyone can lend.** Lenders deposit QUSDC into the LenderVault, earn the fees shops pay, and withdraw whenever the money isn't out with shops. The vault is the pool's only admin, so nobody but a lender can move lender money, not even the team.
+7. **Lenders check it all themselves.** Every shop has a public profile under its `.qie` name, a score anyone can recompute from chain data, and statements in CSV and ISO 20022 camt.053.
 
 ## Proof on mainnet
 
@@ -61,10 +62,12 @@ Every link below opens the QIE explorer.
 | The pool was funded with QUSDC | [0x2cf2…c74a](https://mainnet.qie.digital/tx/0x2cf2045e1cdcc87cca6918652c67cf1a149a7d2b8a4d9a49ebe0772a4809c74a) |
 | The demo shop took a working-capital advance | [0xffc6…914c](https://mainnet.qie.digital/tx/0xffc6398a49cefb5247a5ea81226eb21a0ae5e6c9d22e30aca4670bc44144914c) |
 | Its next sale repaid the advance in the same transaction (`AdvanceRepaid`, `AdvanceClosed`) | [0x540a…074a](https://mainnet.qie.digital/tx/0x540a9d26d0729542678db1bc69213bcc85557c5cc931c4632f0f12d249ba074a) |
+| The pool's admin role moved to the LenderVault | [0x611e…4665](https://mainnet.qie.digital/tx/0x611e6087040f4e062176b2b361a81759f132350aafe385faf585f636ba4f4665) |
+| The team wallet gave up its pool admin role for good | [0xc9af…72b1](https://mainnet.qie.digital/tx/0xc9affedfa3b2e200f3ef8b0456cc64e17497b395ce712281c16829c22a6872b1) |
 
 The pool runs with small demo limits for now (a $1 first advance) so the whole credit cycle could be shown with real money at almost no cost. The contract's hard limits are in the [lending rules](https://veriga-sigma.vercel.app/dashboard/pool).
 
-### Contracts (QIE mainnet, chain 1990, all source-verified)
+### Contracts (QIE mainnet, chain 1990, all six source-verified)
 
 | Contract | Address | Job |
 |---|---|---|
@@ -73,6 +76,7 @@ The pool runs with small demo limits for now (a $1 first advance) so the whole c
 | WorkingCapitalPool | [0xbeb5d332a5C6dDeb117f3cC47fAb74F41f8A4ECA](https://mainnet.qie.digital/address/0xbeb5d332a5C6dDeb117f3cC47fAb74F41f8A4ECA) | Settled volume, credit ladder, advances, defaults |
 | TrustScoreOracle | [0x857c34aCcD229E270b9790dfB6647D6a5fC9BE81](https://mainnet.qie.digital/address/0x857c34aCcD229E270b9790dfB6647D6a5fC9BE81) | Score checkpoints with a canonical inputs hash |
 | VerigaForwarder | [0x6F859A4FC901873a85b8691D25A941A3fe605DBF](https://mainnet.qie.digital/address/0x6F859A4FC901873a85b8691D25A941A3fe605DBF) | ERC-2771 forwarder for gas-free merchant actions |
+| LenderVault | [0x9bDDd37A74B26DEE53Ab1911a171Dc51ecefc647](https://mainnet.qie.digital/address/0x9bDDd37A74B26DEE53Ab1911a171Dc51ecefc647) | Anyone lends QUSDC to shops (ERC-4626). The pool's only admin, so only lenders can move lender money |
 
 ## Two kinds of evidence, labeled honestly
 
@@ -129,7 +133,7 @@ sequenceDiagram
 
 | Component | How Veriga uses it |
 |---|---|
-| QIE mainnet (chain 1990) | All five contracts and every receipt |
+| QIE mainnet (chain 1990) | All six contracts and every receipt |
 | QUSDC | Unit of account, settlement and lending |
 | QIEDEX router | `payWithQIE` swaps native QIE to exact QUSDC inside the payment transaction |
 | QIE Oracle (QIE/USD) | Caps the swap price at 3% over oracle and refuses stale data |
@@ -150,13 +154,14 @@ sequenceDiagram
 - **Printable shop poster** with a QR code customers scan to pay or check the shop.
 - **Installable app** (PWA) that opens straight to the Sell screen.
 - **Five languages**: English, Nigerian Pidgin, Yoruba, Igbo and Hausa on the screens sellers and customers use most.
-- **Pool admin page** where the pool owner adds liquidity, pauses lending and changes rules within the contract's hard limits. Everyone else sees it read-only.
+- **Lend to shops** page where anyone lends QUSDC from their wallet, sees what their share is worth, withdraws, and reads the full loan book.
+- **Pool admin page** where the vault owner pauses new advances or proposes new rules, which wait a day on-chain before anyone can apply them. Everyone else sees it read-only.
 
 ## Repository layout
 
 ```
 contracts/          Solidity 0.8.20, OpenZeppelin 5, berlin EVM target
-  contracts/          the five contracts above, plus QIE interfaces and test mocks
+  contracts/          the six contracts above, plus QIE interfaces and test mocks
   scripts/            deploy, verify, export ABIs, mainnet demo of the credit cycle
   test/               unit tests and mainnet fork tests
 
@@ -214,7 +219,7 @@ The deploy script writes every address and constructor argument to `contracts/de
 
 ## Tests
 
-- **43 contract tests**: settlement, `payWithQIE` with the oracle bound, confirmed and one-tap sales, the gas-free forwarder, settled-volume accounting, per-customer caps, the credit ladder, auto-repayment, defaults and admin limits.
+- **53 contract tests**: lender vault deposits, withdrawals, default write-downs, the one-day rule delay and owner limits, plus settlement, `payWithQIE` with the oracle bound, confirmed and one-tap sales, the gas-free forwarder, settled-volume accounting, per-customer caps, the credit ladder, auto-repayment, defaults and admin limits.
 - **2 fork tests** against live QIE mainnet: a real QIE to QUSDC payment through QIEDEX within the oracle bound, and linking a real `.qie` name from QIE ID. They run with `FORK_MAINNET=1`.
 - **86 indexer tests**: score formula, canonical hashing, event handling, statements, insights, traction filtering, relayer policy and the API.
 - **Live runs on mainnet**: gas-free signup, customer-confirmed sales, QUSDC payments, score checkpoints and a full advance that repaid itself (see [Proof on mainnet](#proof-on-mainnet)).
