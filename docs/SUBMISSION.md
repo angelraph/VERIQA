@@ -94,4 +94,4 @@ The hard part of on-chain credit isn't the lending contract. It's deciding which
 - The translations were drafted with AI help and need native speakers to check them.
 - No external audit yet.
 
-**Demo video:** https://youtu.be/zRwHxhu5MFI · **Try it:** https://veriga-sigma.vercel.app/try · **Code:** https://github.com/angelraph/VERIQA
+**Demo video:** https://youtu.be/zRwHxhu5MFI · **Try it:** https://veriga.xyz/try · **Code:** https://github.com/angelraph/VERIQA

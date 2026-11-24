@@ -10,10 +10,10 @@
 </p>
 
 <p align="center">
-  <a href="https://veriga-sigma.vercel.app"><b>Open the app</b></a> ·
-  <a href="https://veriga-sigma.vercel.app/try"><b>Try it in 3 minutes</b></a> ·
-  <a href="https://veriga-sigma.vercel.app/traction">Live traction</a> ·
-  <a href="https://veriga-sigma.vercel.app/developers">Developers</a>
+  <a href="https://veriga.xyz"><b>Open the app</b></a> ·
+  <a href="https://veriga.xyz/try"><b>Try it in 3 minutes</b></a> ·
+  <a href="https://veriga.xyz/traction">Live traction</a> ·
+  <a href="https://veriga.xyz/developers">Developers</a>
 </p>
 
 ---
@@ -24,14 +24,14 @@ You don't need a wallet, crypto or an account. Everything below happens on QIE m
 
 | Step | What to do | What you should see |
 |---|---|---|
-| 1. Open a shop (30 sec) | Go to [/onboard](https://veriga-sigma.vercel.app/onboard), pick **Use this phone**, type any shop name, tap **Open my shop**. | The Sell screen. Your shop was registered on-chain and Veriga paid the gas. |
+| 1. Open a shop (30 sec) | Go to [/onboard](https://veriga.xyz/onboard), pick **Use this phone**, type any shop name, tap **Open my shop**. | The Sell screen. Your shop was registered on-chain and Veriga paid the gas. |
 | 2. Record a cash sale (45 sec) | Type an amount (switch to NGN if you like) and tap **Show confirmation QR**. Scan it with a second phone, or on one device tap **Testing on one phone? Open the customer screen here**. | The customer screen asks "Did you pay?" |
 | 3. Confirm as the customer (20 sec) | Tap **Yes, I paid** (or **Confirm as a test customer** on the same device). | A green tick on the Sell screen and a link to the transaction. |
 | 4. See what a lender sees (30 sec) | Open **Home**, then **Public profile**. Tap **Run the check in my browser**. | The score breakdown, every receipt, and the score fingerprint recomputed in your browser. |
-| 5. Watch credit repay itself (30 sec) | Open the [demo shop](https://veriga-sigma.vercel.app/m/0xAe7222B4FE93C24D655c85aebC588A44E93f134b). | An advance that was closed by an automatic payment inside a customer's sale. |
-| 6. Check the pool (15 sec) | Open the [lending pool](https://veriga-sigma.vercel.app/dashboard/pool). | Live totals and rules read straight from the contract. |
+| 5. Watch credit repay itself (30 sec) | Open the [demo shop](https://veriga.xyz/m/0xAe7222B4FE93C24D655c85aebC588A44E93f134b). | An advance that was closed by an automatic payment inside a customer's sale. |
+| 6. Check the pool (15 sec) | Open the [lending pool](https://veriga.xyz/dashboard/pool). | Live totals and rules read straight from the contract. |
 
-The same tour is in the app at [/try](https://veriga-sigma.vercel.app/try).
+The same tour is in the app at [/try](https://veriga.xyz/try).
 
 ## The problem
 
@@ -65,7 +65,7 @@ Every link below opens the QIE explorer.
 | The pool's admin role moved to the LenderVault | [0x611e…4665](https://mainnet.qie.digital/tx/0x611e6087040f4e062176b2b361a81759f132350aafe385faf585f636ba4f4665) |
 | The team wallet gave up its pool admin role for good | [0xc9af…72b1](https://mainnet.qie.digital/tx/0xc9affedfa3b2e200f3ef8b0456cc64e17497b395ce712281c16829c22a6872b1) |
 
-The pool runs with small demo limits for now (a $1 first advance) so the whole credit cycle could be shown with real money at almost no cost. The contract's hard limits are in the [lending rules](https://veriga-sigma.vercel.app/dashboard/pool).
+The pool runs with small demo limits for now (a $1 first advance) so the whole credit cycle could be shown with real money at almost no cost. The contract's hard limits are in the [lending rules](https://veriga.xyz/dashboard/pool).
 
 ### Contracts (QIE mainnet, chain 1990, all six source-verified)
 
@@ -228,11 +228,11 @@ The deploy script writes every address and constructor argument to `contracts/de
 
 The contracts guarantee that nobody can record a cash sale alone, that the relayer can't act without a signature, that receipts can't move, that QIE swaps stay within the oracle bound, and that the pool admin can't push terms past hard limits or touch lent funds.
 
-The known limits are written down too. Customer keys can be invented, which is why cash sales are capped and never count toward borrowing. Merchants can sell off-platform, which is why first limits are small and defaults are public. The score updater is a trusted role, so every checkpoint carries an inputs hash anyone can recompute. QUSDC has an issuer. The full list is on the [Security page](https://veriga-sigma.vercel.app/security). Veriga hasn't had an external audit yet.
+The known limits are written down too. Customer keys can be invented, which is why cash sales are capped and never count toward borrowing. Merchants can sell off-platform, which is why first limits are small and defaults are public. The score updater is a trusted role, so every checkpoint carries an inputs hash anyone can recompute. QUSDC has an issuer. The full list is on the [Security page](https://veriga.xyz/security). Veriga hasn't had an external audit yet.
 
 ## How traction is counted
 
-The [traction page](https://veriga-sigma.vercel.app/traction) and [API](https://veriga-sigma.vercel.app/api/traction) count only organic activity. Team and test wallets listed in `TEAM_WALLETS`, merchants paying themselves, and payments where the payer is itself a registered merchant are left out and shown separately.
+The [traction page](https://veriga.xyz/traction) and [API](https://veriga.xyz/api/traction) count only organic activity. Team and test wallets listed in `TEAM_WALLETS`, merchants paying themselves, and payments where the payer is itself a registered merchant are left out and shown separately.
 
 ## License
 

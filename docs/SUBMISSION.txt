@@ -67,5 +67,5 @@ Honest limits
 The pool runs small demo limits for now, with a $1 first advance. Customer keys can be invented, which is why cash sales are capped and never count toward borrowing. The score updater is a trusted role, and every checkpoint carries a fingerprint anyone can check. QIE Pass needs partner keys. The translations were drafted with AI help and need native speakers to review them. There's been no external audit yet.
 
 Demo video: https://youtu.be/zRwHxhu5MFI
-Try it in 3 minutes: https://veriga-sigma.vercel.app/try
+Try it in 3 minutes: https://veriga.xyz/try
 Code: https://github.com/angelraph/VERIQA
