@@ -99,7 +99,7 @@ flowchart TB
   PR -- "swaps QIE to QUSDC, price checked" --> DEX["QIEDEX router + QIE/USD oracle"]
   REG -- "checks the .qie name both ways" --> N["QIE ID names"]
   PR -- "share of each sale repays an open advance" --> POOL["WorkingCapitalPool<br/>QUSDC"]
-  PR -. "events" .-> API
+  PR -.->|events| API
   API -- "daily score checkpoint + inputs hash" --> T["TrustScoreOracle"]
   T -- "minimum score to borrow" --> POOL
   API --> L["Public profiles, statements, traction<br/>what lenders check"]
