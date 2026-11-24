@@ -80,7 +80,10 @@ function Overview() {
   }, [sales]);
 
   const b = m.indexed?.scoreBreakdown;
-  const firstName = m.profile.name.split(" ")[0];
+  // "Amaka's shop" greets as "Amaka", not "Amaka's". A name that starts with
+  // a filler word ("The Corner Shop") is used whole.
+  const firstWord = (m.profile.name.trim().split(/\s+/)[0] ?? "").replace(/['’]s$/i, "");
+  const firstName = !firstWord || /^(the|my|our|a|an)$/i.test(firstWord) ? m.profile.name.trim() || "there" : firstWord;
 
   return (
     <div className="space-y-5">
