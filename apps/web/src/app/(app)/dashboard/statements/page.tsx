@@ -86,7 +86,7 @@ function Statements() {
               <div>
                 <div className="font-medium">{mo.label}</div>
                 <div className="text-sm text-ink-500">
-                  {mo.count} sales, {formatUSD(mo.total)}
+                  {mo.count} {mo.count === 1 ? "sale" : "sales"}, {formatUSD(mo.total)}
                 </div>
               </div>
               <div className="flex gap-2">

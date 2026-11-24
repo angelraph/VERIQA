@@ -107,7 +107,8 @@ export default function TryPage() {
             <div>
               <h3 className="font-semibold">Honest numbers</h3>
               <p className="mt-2 text-sm leading-6 text-ink-500">
-                Test and team wallets are left out of <Link href="/traction" className="link">traction</Link>, so your own tries won&apos;t inflate it either.
+                Our own team and test wallets are left out of <Link href="/traction" className="link">traction</Link>. One-device test sales are cash sales, so they
+                never raise how much a shop can borrow.
               </p>
             </div>
             <div>

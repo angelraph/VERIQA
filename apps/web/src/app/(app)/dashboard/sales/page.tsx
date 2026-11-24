@@ -10,6 +10,8 @@ import { Card, TierBadge, TxLink, Stat, Empty } from "@/components/ui";
 type Filter = "all" | "settled" | "attested";
 type Range = "7" | "30" | "90" | "all";
 
+const salesCount = (n: number) => `${n} ${n === 1 ? "sale" : "sales"}`;
+
 export default function SalesPage() {
   return (
     <ShopGate>
@@ -62,9 +64,9 @@ function Sales() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Total" value={money.fmt(total).split(" (")[0]} hint={`${rows.length} sales`} />
-        <Stat label="Settled on-chain" value={formatUSD(settled.reduce((a, r) => a + r.amountUSD, 0))} hint={`${settled.length} sales`} />
-        <Stat label="Cash, confirmed" value={formatUSD(total - settled.reduce((a, r) => a + r.amountUSD, 0))} hint={`${rows.length - settled.length} sales`} />
+        <Stat label="Total" value={money.fmt(total).split(" (")[0]} hint={salesCount(rows.length)} />
+        <Stat label="Settled on-chain" value={formatUSD(settled.reduce((a, r) => a + r.amountUSD, 0))} hint={salesCount(settled.length)} />
+        <Stat label="Cash, confirmed" value={formatUSD(total - settled.reduce((a, r) => a + r.amountUSD, 0))} hint={salesCount(rows.length - settled.length)} />
         <Stat label="Sent to your advance" value={formatUSD(repaid)} hint="automatic repayments" />
       </div>
 

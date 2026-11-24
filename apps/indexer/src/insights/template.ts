@@ -7,6 +7,10 @@ function round(value: number, decimals = 1): number {
   return Math.round(value * factor) / factor;
 }
 
+function usd(value: number): string {
+  return `$${value.toFixed(2)}`;
+}
+
 /// Deterministic, template-only summary, the product must be fully demoable
 /// with this alone (no LLM call at all). See summarize.ts for the optional
 /// cosmetic phrasing layer built strictly on top of these same sentences.
@@ -24,15 +28,19 @@ export function generateTemplateSummary(stats: WeeklyStats): string[] {
   if (stats.revenueChangePct !== null) {
     const direction = stats.revenueChangePct >= 0 ? "up" : "down";
     sentences.push(
-      `Revenue is ${direction} ${round(Math.abs(stats.revenueChangePct))}% versus last week ($${round(stats.revenueLastWeek)} → $${round(stats.revenueThisWeek)}).`
+      `Revenue is ${direction} ${round(Math.abs(stats.revenueChangePct))}% versus last week (${usd(stats.revenueLastWeek)} → ${usd(stats.revenueThisWeek)}).`
     );
   } else if (stats.revenueThisWeek > 0) {
-    sentences.push(`You brought in $${round(stats.revenueThisWeek)} this week.`);
+    sentences.push(`You brought in ${usd(stats.revenueThisWeek)} this week.`);
   } else {
     sentences.push(`No revenue recorded this week.`);
   }
 
-  const customerSentenceParts = [`${stats.uniqueCustomersThisWeek} customers paid you this week`];
+  const customerSentenceParts = [
+    stats.uniqueCustomersThisWeek === 1
+      ? "1 customer paid you this week"
+      : `${stats.uniqueCustomersThisWeek} customers paid you this week`,
+  ];
   if (stats.uniqueCustomersTrailingAvg > 0) {
     customerSentenceParts.push(`versus a recent average of ${round(stats.uniqueCustomersTrailingAvg)}`);
   }

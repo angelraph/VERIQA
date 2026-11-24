@@ -128,7 +128,7 @@ function Overview() {
                 <span className={pct(sum(cur), sum(prev)) >= 0 ? "text-mint-600" : "text-rose-600"}>
                   {pct(sum(cur), sum(prev)) >= 0 ? "↗" : "↘"} {Math.abs(Math.round(pct(sum(cur), sum(prev))))}% vs previous {range} days
                 </span>
-                <span className="text-ink-500">{cur.length} sales</span>
+                <span className="text-ink-500">{cur.length} {cur.length === 1 ? "sale" : "sales"}</span>
               </div>
             </div>
             <div className="flex rounded-full bg-canvas p-1 text-xs ring-1 ring-ink-200">

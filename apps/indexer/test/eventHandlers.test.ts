@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { FakeRepository } from "./fakeRepository";
 import {
   handleMerchantRegistered,
@@ -16,6 +16,15 @@ import {
 const M = "0xMerchant";
 const NOW = new Date("2026-11-23T00:00:00Z");
 const ts = (d: Date) => BigInt(Math.floor(d.getTime() / 1000));
+
+// Scores depend on shop age, so pin the clock to NOW.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(NOW);
+});
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 async function repoWithMerchant() {
   const repo = new FakeRepository();
