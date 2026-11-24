@@ -23,6 +23,9 @@ export default function LendersPage() {
           Most small shops are invisible to credit bureaus. Veriga gives you a sales history signed by their customers, a transparent score and
           repayment that runs itself.
         </p>
+        <Link href="/lend" className="mt-8 inline-block rounded-full bg-ink-900 px-6 py-3 text-sm font-semibold text-white">
+          Lend to shops now
+        </Link>
       </PageHero>
 
       <section className="container-page grid gap-4 pb-20 lg:grid-cols-3">

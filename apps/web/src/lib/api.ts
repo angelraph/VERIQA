@@ -226,3 +226,21 @@ export interface LiveInsight {
   sentences: string[];
 }
 export const fetchLiveInsight = (id: string) => getJson<LiveInsight>(`/merchants/${encodeURIComponent(id)}/insights/live`);
+
+export interface CreditBookEntry {
+  merchant: string;
+  profileURI: string | null;
+  qieName: string | null;
+  demo: boolean;
+  principalUSD: number;
+  feeUSD: number;
+  outstandingUSD: number;
+  repaidAutomaticallyUSD: number;
+  repaidManuallyUSD: number;
+  status: "open" | "closed" | "defaulted" | "closed_after_default";
+  startedAt: string;
+  dueAt: string;
+  closedAt: string | null;
+  txHash: string;
+}
+export const fetchCreditBook = () => getJson<{ advances: CreditBookEntry[] }>(`/credit/book`);

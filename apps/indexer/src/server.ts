@@ -7,6 +7,7 @@ import { tractionRouter } from "./routes/traction";
 import { relayRouter } from "./relayer/router";
 import { fxRouter } from "./routes/fx";
 import { receiptsRouter } from "./routes/receipts";
+import { creditRouter } from "./routes/credit";
 import { syncIfStale, syncNow } from "./sync";
 
 const app = express();
@@ -37,7 +38,7 @@ const catchUp: express.RequestHandler = (_req, _res, next) => {
     .catch(() => undefined)
     .finally(() => next());
 };
-app.use(["/api/merchants", "/api/customers", "/api/traction", "/api/receipts"], catchUp);
+app.use(["/api/merchants", "/api/customers", "/api/traction", "/api/receipts", "/api/credit"], catchUp);
 
 // Daily job from Vercel Cron: catch up on the chain, then checkpoint scores
 // on-chain if a score publisher key is configured. Vercel signs cron calls
@@ -74,6 +75,7 @@ app.use("/api/traction", tractionRouter);
 app.use("/api/relay", relayRouter);
 app.use("/api/fx", fxRouter);
 app.use("/api/receipts", receiptsRouter);
+app.use("/api/credit", creditRouter);
 
 // Last line of defense: an unexpected error answers 500 instead of stopping the process.
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

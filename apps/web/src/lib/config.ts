@@ -8,5 +8,6 @@ export const ADDR = {
   pool: contractAddresses.workingCapitalPool,
   oracle: contractAddresses.trustScoreOracle,
   forwarder: contractAddresses.forwarder,
+  vault: contractAddresses.lenderVault,
 };
 export const isDeployed = Boolean(ADDR.registry && ADDR.receipts && ADDR.pool && ADDR.forwarder);

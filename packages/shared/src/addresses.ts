@@ -13,4 +13,5 @@ export const contractAddresses = {
   trustScoreOracle: env(process.env.TRUST_SCORE_ORACLE_ADDRESS, process.env.NEXT_PUBLIC_TRUST_SCORE_ORACLE_ADDRESS),
   workingCapitalPool: env(process.env.WORKING_CAPITAL_POOL_ADDRESS, process.env.NEXT_PUBLIC_WORKING_CAPITAL_POOL_ADDRESS),
   forwarder: env(process.env.FORWARDER_ADDRESS, process.env.NEXT_PUBLIC_FORWARDER_ADDRESS),
+  lenderVault: env(process.env.LENDER_VAULT_ADDRESS, process.env.NEXT_PUBLIC_LENDER_VAULT_ADDRESS),
 };

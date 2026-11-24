@@ -27,7 +27,12 @@ const config: HardhatUserConfig = {
     // FORK_MAINNET=1 runs the suite against a fork of live QIE mainnet so the
     // real QIEDEX router, QIE/USD oracle, QUSDC and QIE ID contracts are exercised.
     hardhat: process.env.FORK_MAINNET
-      ? { forking: { url: process.env.QIE_MAINNET_RPC || "https://rpc1mainnet.qie.digital/" }, chainId: 1990 }
+      ? {
+          forking: { url: process.env.QIE_MAINNET_RPC || "https://rpc1mainnet.qie.digital/" },
+          chainId: 1990,
+          // QIE runs berlin rules, so calls at the fork block itself can execute.
+          chains: { 1990: { hardforkHistory: { berlin: 0 } } },
+        }
       : {},
     qieMainnet: {
       url: process.env.QIE_MAINNET_RPC || "https://rpc1mainnet.qie.digital/",

@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAccount, useReadContract, useReadContracts, useWriteContract, usePublicClient } from "wagmi";
 import { formatUnits, parseUnits } from "viem";
-import { erc20Abi, workingCapitalPoolAbi, QUSDC_ADDRESS, explorerAddress } from "@veriga/shared";
+import Link from "next/link";
+import { erc20Abi, workingCapitalPoolAbi, lenderVaultAbi, QUSDC_ADDRESS, explorerAddress } from "@veriga/shared";
 import { ADDR } from "@/lib/config";
 import { formatUSD } from "@/lib/money";
 import { Card, Stat, Button, ErrorText, Badge } from "@/components/ui";
@@ -24,7 +25,10 @@ type P = {
   perPayerEpochCap: bigint;
 };
 
-/// Pool admin: only the wallet holding DEFAULT_ADMIN_ROLE can change anything.
+/// Pool admin. Once the LenderVault is the pool's only admin, the vault owner
+/// can pause new advances and propose new rules, which wait a day on-chain
+/// before anyone can apply them. Lending and withdrawing live on /lend.
+/// Before the handover, the wallet holding DEFAULT_ADMIN_ROLE manages it directly.
 /// Everyone else sees the same numbers read-only, straight from the contract.
 export default function PoolAdminPage() {
   const { address } = useAccount();
@@ -45,6 +49,26 @@ export default function PoolAdminPage() {
   });
   const liquidity = useReadContract({ address: QUSDC_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: [ADDR.pool], query: { refetchInterval: 10_000 } });
   const isAdmin = useReadContract({ ...base, functionName: "hasRole", args: address ? [ADMIN_ROLE, address] : undefined, query: { enabled: Boolean(address) } });
+  const vb = { address: ADDR.vault, abi: lenderVaultAbi } as const;
+  const vaultIsAdmin = useReadContract({ ...base, functionName: "hasRole", args: [ADMIN_ROLE, ADDR.vault], query: { enabled: Boolean(ADDR.vault) } });
+  const vaultReads = useReadContracts({
+    contracts: [
+      { ...vb, functionName: "owner" },
+      { ...vb, functionName: "pendingParamsEta" },
+      { ...vb, functionName: "pendingParams" },
+    ],
+    query: { enabled: Boolean(ADDR.vault), refetchInterval: 15_000 },
+  });
+  const vaultMode = vaultIsAdmin.data === true;
+  const vaultOwner = vaultReads.data?.[0]?.result as string | undefined;
+  const eta = vaultReads.data?.[1]?.result as bigint | undefined;
+  const pending = vaultReads.data?.[2]?.result as unknown as readonly bigint[] | undefined;
+  const isOwner = Boolean(address && vaultOwner && address.toLowerCase() === vaultOwner.toLowerCase());
+  const [nowSec, setNowSec] = useState(() => Math.floor(Date.now() / 1000));
+  useEffect(() => {
+    const t = setInterval(() => setNowSec(Math.floor(Date.now() / 1000)), 30_000);
+    return () => clearInterval(t);
+  }, []);
   const walletQusdc = useReadContract({ address: QUSDC_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: address ? [address] : undefined, query: { enabled: Boolean(address), refetchInterval: 10_000 } });
 
   const p = reads.data?.[0]?.result as unknown as readonly bigint[] | undefined;
@@ -53,7 +77,9 @@ export default function PoolAdminPage() {
     : null;
   const [lent, repaid, fees, outstanding] = [1, 2, 3, 4].map((i) => reads.data?.[i]?.result as bigint | undefined);
   const paused = reads.data?.[5]?.result as boolean | undefined;
-  const admin = isAdmin.data === true;
+  const directAdmin = isAdmin.data === true;
+  // "admin" means: this wallet may manage the pool, directly or as vault owner.
+  const admin = vaultMode ? isOwner : directAdmin;
 
   const [form, setForm] = useState<Record<string, string>>({});
   useEffect(() => {
@@ -94,6 +120,7 @@ export default function PoolAdminPage() {
       if (rc.status !== "success") throw new Error("The transaction reverted on QIE. Nothing was changed.");
       setDone(label);
       reads.refetch();
+      vaultReads.refetch();
       liquidity.refetch();
       walletQusdc.refetch();
     } catch (e) {
@@ -116,28 +143,33 @@ export default function PoolAdminPage() {
   const withdraw = () => run("withdraw", () => writeContractAsync({ ...base, functionName: "withdrawLiquidity", args: [units], gas: 200_000n }));
 
   const saveParams = () =>
-    run("params", () =>
-      writeContractAsync({
-        ...base,
-        functionName: "setParams",
-        args: [
-          {
-            minScoreThreshold: BigInt(form.minScoreThreshold || "0"),
-            advanceBps: BigInt(Math.round(Number(form.advancePct) * 100)),
-            feeBps: BigInt(Math.round(Number(form.feePct) * 100)),
-            repayBps: BigInt(Math.round(Number(form.repayPct) * 100)),
-            term: BigInt(Math.round(Number(form.termDays) * 86400)),
-            baseCreditLimit: parseUnits(form.baseCreditLimit || "0", 6),
-            maxLadderSteps: BigInt(form.maxLadderSteps || "0"),
-            minDistinctPayers: BigInt(form.minDistinctPayers || "0"),
-            perPayerEpochCap: parseUnits(form.perPayerEpochCap || "0", 6),
-          },
-        ],
-        gas: 250_000n,
-      })
-    );
+    run("params", () => {
+      const next = {
+        minScoreThreshold: BigInt(form.minScoreThreshold || "0"),
+        advanceBps: BigInt(Math.round(Number(form.advancePct) * 100)),
+        feeBps: BigInt(Math.round(Number(form.feePct) * 100)),
+        repayBps: BigInt(Math.round(Number(form.repayPct) * 100)),
+        term: BigInt(Math.round(Number(form.termDays) * 86400)),
+        baseCreditLimit: parseUnits(form.baseCreditLimit || "0", 6),
+        maxLadderSteps: BigInt(form.maxLadderSteps || "0"),
+        minDistinctPayers: BigInt(form.minDistinctPayers || "0"),
+        perPayerEpochCap: parseUnits(form.perPayerEpochCap || "0", 6),
+      };
+      return vaultMode
+        ? writeContractAsync({ ...vb, functionName: "proposeParams", args: [next], gas: 250_000n })
+        : writeContractAsync({ ...base, functionName: "setParams", args: [next], gas: 250_000n });
+    });
 
-  const togglePause = () => run("pause", () => writeContractAsync({ ...base, functionName: paused ? "unpause" : "pause", gas: 120_000n }));
+  const togglePause = () =>
+    run("pause", () =>
+      vaultMode
+        ? writeContractAsync({ ...vb, functionName: paused ? "unpauseLending" : "pauseLending", gas: 150_000n })
+        : writeContractAsync({ ...base, functionName: paused ? "unpause" : "pause", gas: 120_000n })
+    );
+  const applyPending = () => run("apply", () => writeContractAsync({ ...vb, functionName: "applyParams", gas: 250_000n }));
+  const cancelPending = () => run("cancel", () => writeContractAsync({ ...vb, functionName: "cancelParams", gas: 120_000n }));
+  const hasPending = eta !== undefined && eta > 0n;
+  const due = hasPending && BigInt(nowSec) >= eta!;
 
   const FIELDS: { key: string; label: string; hint: string }[] = [
     { key: "baseCreditLimit", label: "First advance limit (USD)", hint: "Doubles after each on-time repayment" },
@@ -165,7 +197,8 @@ export default function PoolAdminPage() {
         </div>
         <div className="flex items-center gap-2">
           {paused !== undefined && <Badge tone={paused ? "rose" : "mint"}>{paused ? "Paused" : "Lending open"}</Badge>}
-          {address ? admin ? <Badge tone="violet">You are the pool admin</Badge> : <Badge>Read-only view</Badge> : <ConnectWalletButton />}
+          {vaultMode && <Badge tone="mint">Run by the lender vault</Badge>}
+          {address ? admin ? <Badge tone="violet">{vaultMode ? "You own the vault" : "You are the pool admin"}</Badge> : <Badge>Read-only view</Badge> : <ConnectWalletButton />}
         </div>
       </div>
 
@@ -177,8 +210,45 @@ export default function PoolAdminPage() {
         <Stat label="Outstanding" value={formatUSD(usd(outstanding))} />
       </div>
 
+      {vaultMode && (
+        <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-semibold">Anyone can lend to this pool</h2>
+            <p className="mt-1 text-sm text-ink-500">
+              The lender vault is the pool&apos;s only admin. Money goes in and out only through lenders&apos; own shares, so nobody else can move it.
+            </p>
+          </div>
+          <Link href="/lend" className="w-full rounded-full bg-ink-900 px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">
+            Lend or withdraw
+          </Link>
+        </Card>
+      )}
+
+      {hasPending && pending && (
+        <Card>
+          <h2 className="font-semibold">New rules waiting on-chain</h2>
+          <p className="mt-1 text-sm text-ink-500">
+            Fee {Number(pending[2]) / 100}%, repayment share {Number(pending[3]) / 100}%, first advance limit {formatUSD(usd(pending[5]))}, minimum score{" "}
+            {String(pending[0])}. {due ? "The waiting day is over, so anyone can apply them now." : `They can be applied after ${new Date(Number(eta) * 1000).toLocaleString()}.`}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {due && (
+              <Button onClick={applyPending} loading={busy === "apply"}>
+                Apply the new rules
+              </Button>
+            )}
+            {isOwner && (
+              <Button variant="secondary" onClick={cancelPending} loading={busy === "cancel"}>
+                Cancel them
+              </Button>
+            )}
+          </div>
+        </Card>
+      )}
+
       {admin && (
         <div className="grid gap-5 lg:grid-cols-2">
+          {!vaultMode && (
           <Card>
             <h2 className="font-semibold">Add or withdraw liquidity</h2>
             <p className="mt-1 text-sm text-ink-500">Only idle money can be withdrawn. Money lent to merchants comes back through repayments.</p>
@@ -196,10 +266,13 @@ export default function PoolAdminPage() {
             <p className="mt-2 text-xs text-ink-500">Your wallet holds {formatUSD(usd(walletQusdc.data as bigint | undefined))} QUSDC.</p>
             {(done === "deposit" || done === "withdraw") && <p className="mt-2 text-sm text-mint-600">Done. The numbers above are updated.</p>}
           </Card>
+          )}
 
           <Card>
             <h2 className="font-semibold">Emergency switch</h2>
-            <p className="mt-1 text-sm text-ink-500">Pausing stops new advances right away. Repayments and sales keep working.</p>
+            <p className="mt-1 text-sm text-ink-500">
+              Pausing stops new advances right away. Repayments, sales{vaultMode ? " and lender withdrawals" : ""} keep working.
+            </p>
             <Button variant={paused ? "primary" : "danger"} className="mt-4" onClick={togglePause} loading={busy === "pause"}>
               {paused ? "Reopen lending" : "Pause new advances"}
             </Button>
@@ -230,9 +303,11 @@ export default function PoolAdminPage() {
         {admin && (
           <div className="mt-5 flex items-center gap-3">
             <Button onClick={saveParams} loading={busy === "params"}>
-              Save rules on QIE
+              {vaultMode ? "Propose these rules" : "Save rules on QIE"}
             </Button>
-            {done === "params" && <span className="text-sm text-mint-600">Saved on-chain.</span>}
+            {done === "params" && (
+              <span className="text-sm text-mint-600">{vaultMode ? "Proposed. They can be applied after a one-day wait." : "Saved on-chain."}</span>
+            )}
           </div>
         )}
         <ErrorText error={error} />

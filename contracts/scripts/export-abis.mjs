@@ -13,6 +13,7 @@ const targets = {
   TrustScoreOracle: "trustScoreOracle",
   WorkingCapitalPool: "workingCapitalPool",
   VerigaForwarder: "verigaForwarder",
+  LenderVault: "lenderVault",
 };
 for (const [contract, name] of Object.entries(targets)) {
   const file = path.join(artifacts, `${contract}.sol`, `${contract}.json`);

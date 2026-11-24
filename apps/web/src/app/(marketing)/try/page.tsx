@@ -56,11 +56,11 @@ const STEPS: { n: string; time: string; title: string; body: string; href: strin
   {
     n: "6",
     time: "15 sec",
-    title: "Check it all on-chain",
-    body: "The lending pool, its rules and every number come straight from the verified contracts. Download a statement as ISO 20022 camt.053 from any profile.",
-    href: "/dashboard/pool",
-    cta: "Open the lending pool",
-    check: "Every figure links to the QIE explorer.",
+    title: "See who funds the loans",
+    body: "Anyone can lend QUSDC to shops through the lender vault and earn the fees they pay. The page shows every advance and how it came back, and only lenders can move their money.",
+    href: "/lend",
+    cta: "Open Lend to shops",
+    check: "Live totals and the full loan book, straight from the contracts.",
   },
 ];
 

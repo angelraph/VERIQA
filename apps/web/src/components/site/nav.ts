@@ -8,6 +8,7 @@ export const PRODUCT_LINKS: NavItem[] = [
   { href: "/how-it-works", label: "How it works", body: "From a cash sale to working capital in three steps" },
   { href: "/merchants", label: "For merchants", body: "Record sales, take payments, unlock capital" },
   { href: "/lenders", label: "For lenders", body: "Underwrite on proof you can check yourself" },
+  { href: "/lend", label: "Lend to shops", body: "Earn the fees shops pay, withdraw when you want" },
   { href: "/pricing", label: "Pricing", body: "Free to sell. One clear fee on advances" },
 ];
 
@@ -31,6 +32,7 @@ export const FOOTER_COLUMNS: { title: string; links: NavItem[] }[] = [
       { href: "/how-it-works", label: "How it works" },
       { href: "/merchants", label: "For merchants" },
       { href: "/lenders", label: "For lenders" },
+      { href: "/lend", label: "Lend to shops" },
       { href: "/pricing", label: "Pricing" },
       { href: "/onboard", label: "Open a shop" },
     ],
