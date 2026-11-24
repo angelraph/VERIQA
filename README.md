@@ -96,11 +96,11 @@ flowchart TB
   FWD --> REG["MerchantRegistry"]
   FWD --> PR["PaymentReceipts"]
   W["Customer with QIE Wallet"] -- "pays in QUSDC, or QIE" --> PR
-  PR -- "swaps QIE to QUSDC, price checked" --> DEX["QIEDEX router + QIE/USD oracle"]
+  PR -- "swaps QIE to QUSDC, price checked" --> DEX["QIEDEX router and QIE-USD oracle"]
   REG -- "checks the .qie name both ways" --> N["QIE ID names"]
   PR -- "share of each sale repays an open advance" --> POOL["WorkingCapitalPool<br/>QUSDC"]
-  PR -.->|events| API
-  API -- "daily score checkpoint + inputs hash" --> T["TrustScoreOracle"]
+  PR -- "events" --> API
+  API -- "daily score checkpoint with inputs hash" --> T["TrustScoreOracle"]
   T -- "minimum score to borrow" --> POOL
   API --> L["Public profiles, statements, traction<br/>what lenders check"]
 ```
