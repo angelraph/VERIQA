@@ -1,0 +1,50 @@
+# Render Blueprint: the Veriga web app (with its API at /api) on Render's free plan.
+# Secrets are marked sync: false, so Render asks for them and they never live in git.
+services:
+  - type: web
+    name: veriga
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: master
+    buildCommand: npm ci --include=dev && npm run build -w apps/web
+    startCommand: npm run start -w apps/web
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=460
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_INDEXER_API_URL
+        value: /api
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://veriga.xyz
+      - key: NEXT_PUBLIC_FORWARDER_ADDRESS
+        value: "0x6F859A4FC901873a85b8691D25A941A3fe605DBF"
+      - key: NEXT_PUBLIC_MERCHANT_REGISTRY_ADDRESS
+        value: "0x6005A1e73A6cCd2759eC5bC9f74F80997393cc22"
+      - key: NEXT_PUBLIC_PAYMENT_RECEIPTS_ADDRESS
+        value: "0x4e1A43B27F83532d1547C64b353Cb23CDd7A490E"
+      - key: NEXT_PUBLIC_TRUST_SCORE_ORACLE_ADDRESS
+        value: "0x857c34aCcD229E270b9790dfB6647D6a5fC9BE81"
+      - key: NEXT_PUBLIC_WORKING_CAPITAL_POOL_ADDRESS
+        value: "0xbeb5d332a5C6dDeb117f3cC47fAb74F41f8A4ECA"
+      - key: NEXT_PUBLIC_LENDER_VAULT_ADDRESS
+        value: "0x9bDDd37A74B26DEE53Ab1911a171Dc51ecefc647"
+      - key: START_BLOCK
+        value: "12116382"
+      - key: SYNC_ON_REQUEST
+        value: "1"
+      - key: TEAM_WALLETS
+        value: "0xd1f63Cf7c1C9Bbb577131615B84BB3981e6Efc14,0x75A536FBA9b030422377F3C04068285780841500,0x8Cc11f7CB3ABA3acF4b5dEbe22eEF51532aAcBa7,0x2452a7F80d983f84F4af38E5Ca3450F9224dC7FA,0x4cd6E1c6e603A536fF07f0E5471Bc1fD2CEcC997,0x8634CDbE7090D418F06A3E8Ca914767DCc94CFa8,0xAe7222B4FE93C24D655c85aebC588A44E93f134b,0xe9f2C0747ba44203511947d18A1221d9f6607905,0xbC3814C92Ec548Bec5a14E57bB5D748349964e1E,0x4a0Eac5B62f6346Fe5e7BA99bAf2371d3df07375"
+      # Secrets: you paste these in Render, they are not stored here.
+      - key: POSTGRES_PRISMA_URL
+        sync: false
+      - key: POSTGRES_URL_NON_POOLING
+        sync: false
+      - key: RELAYER_PRIVATE_KEY
+        sync: false
+      - key: CRON_SECRET
+        sync: false
