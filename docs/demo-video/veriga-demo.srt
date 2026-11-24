@@ -1,0 +1,231 @@
+1
+00:00:00,450 --> 00:00:01,861
+This is Veriga.
+
+2
+00:00:01,901 --> 00:00:04,827
+It turns the sales a small shop already
+
+3
+00:00:04,867 --> 00:00:07,730
+makes into credit it can actually use.
+
+4
+00:00:08,512 --> 00:00:12,726
+Picture a shop that's sold to the same families for years.
+
+5
+00:00:12,766 --> 00:00:16,401
+It's all cash, so when the owner asks for a loan,
+
+6
+00:00:16,441 --> 00:00:18,721
+nobody can see the business.
+
+7
+00:00:18,761 --> 00:00:23,040
+Veriga fixes that, and her customers don't need any crypto.
+
+8
+00:00:23,867 --> 00:00:25,336
+Here's Veriga.
+
+9
+00:00:25,376 --> 00:00:30,067
+Everything you're about to see is live on QIE mainnet, today.
+
+10
+00:00:30,878 --> 00:00:35,572
+For judges and first-time visitors, there's a three-minute tour.
+
+11
+00:00:35,612 --> 00:00:37,150
+Let's follow it.
+
+12
+00:00:37,956 --> 00:00:40,503
+Opening a shop takes one tap.
+
+13
+00:00:40,543 --> 00:00:42,321
+No wallet, no gas.
+
+14
+00:00:42,361 --> 00:00:45,537
+A key is created right in the browser,
+
+15
+00:00:45,577 --> 00:00:48,334
+and Veriga pays the network fee.
+
+16
+00:00:48,374 --> 00:00:51,620
+That was a real transaction on mainnet.
+
+17
+00:00:52,442 --> 00:00:55,738
+Ada types the price the way she says it.
+
+18
+00:00:55,778 --> 00:00:58,518
+Two thousand five hundred naira.
+
+19
+00:00:58,558 --> 00:01:01,714
+Then she shows her customer a QR code.
+
+20
+00:01:02,580 --> 00:01:07,262
+The customer scans it with any phone camera and taps yes.
+
+21
+00:01:07,302 --> 00:01:09,732
+No app, no wallet, no fee.
+
+22
+00:01:09,772 --> 00:01:14,673
+Two signatures from two phones, so nobody can fake it alone.
+
+23
+00:01:14,713 --> 00:01:17,215
+And there's the green tick.
+
+24
+00:01:17,255 --> 00:01:18,668
+It's on QIE.
+
+25
+00:01:19,679 --> 00:01:23,190
+Her dashboard shows her sales, her trust score,
+
+26
+00:01:23,230 --> 00:01:27,387
+and a short weekly note, worked out only from real sales.
+
+27
+00:01:27,427 --> 00:01:28,807
+No AI guesses.
+
+28
+00:01:29,616 --> 00:01:32,521
+It speaks her language too.
+
+29
+00:01:32,561 --> 00:01:36,560
+Pidgin, Yoruba, Igbo, Hausa, or English.
+
+30
+00:01:37,357 --> 00:01:40,113
+She can print a poster for her counter,
+
+31
+00:01:40,153 --> 00:01:43,029
+so customers can pay or check her record.
+
+32
+00:01:43,821 --> 00:01:45,750
+This is what a lender sees.
+
+33
+00:01:45,790 --> 00:01:48,449
+Every receipt, the full score breakdown,
+
+34
+00:01:48,489 --> 00:01:51,598
+and a check anyone can run in their own browser,
+
+35
+00:01:51,638 --> 00:01:55,253
+to prove the score matches the fingerprint stored on QIE.
+
+36
+00:01:56,047 --> 00:01:57,624
+Now the best part.
+
+37
+00:01:57,664 --> 00:02:00,050
+This shop took a small advance,
+
+38
+00:02:00,090 --> 00:02:03,657
+and its very next sale paid it back automatically,
+
+39
+00:02:03,697 --> 00:02:05,647
+in the same transaction.
+
+40
+00:02:05,687 --> 00:02:07,575
+Then its limit doubled.
+
+41
+00:02:08,359 --> 00:02:10,612
+Cash sales build a reputation,
+
+42
+00:02:10,652 --> 00:02:13,027
+but only money that really moved
+
+43
+00:02:13,067 --> 00:02:15,742
+on-chain can raise a borrowing limit.
+
+44
+00:02:15,782 --> 00:02:18,338
+And statements export in ISO 20022,
+
+45
+00:02:18,378 --> 00:02:20,631
+the format banks already read.
+
+46
+00:02:21,425 --> 00:02:24,566
+Customers who do have crypto can pay in QUSDC,
+
+47
+00:02:24,606 --> 00:02:28,335
+or in QIE that swaps through QIEDEX in the same payment,
+
+48
+00:02:28,375 --> 00:02:30,985
+checked against the QIE price oracle.
+
+49
+00:02:31,788 --> 00:02:34,499
+So where does the money come from?
+
+50
+00:02:34,539 --> 00:02:38,626
+Anyone can lend QUSDC to shops, earn the fees they pay,
+
+51
+00:02:38,666 --> 00:02:41,246
+and take it back when they want.
+
+52
+00:02:41,286 --> 00:02:43,997
+Only lenders can move their money.
+
+53
+00:02:44,037 --> 00:02:45,308
+Not even us.
+
+54
+00:02:46,102 --> 00:02:49,916
+And you don't have to take our word for any of it.
+
+55
+00:02:49,956 --> 00:02:53,238
+Here's that repayment on the QIE explorer.
+
+56
+00:02:54,037 --> 00:02:55,243
+Veriga.
+
+57
+00:02:55,283 --> 00:02:58,066
+Every sale becomes credit.
+
+58
+00:02:58,106 --> 00:03:02,301
+Try it yourself at veriga-sigma.vercel.app.
