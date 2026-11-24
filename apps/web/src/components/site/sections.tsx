@@ -22,7 +22,7 @@ export function Ribbon({ className = "" }: { className?: string }) {
 }
 
 export function LiveTicker() {
-  const t = useQuery({ queryKey: ["traction"], queryFn: fetchTraction, refetchInterval: 15_000, retry: 1 });
+  const t = useQuery({ queryKey: ["traction"], queryFn: fetchTraction, refetchInterval: 60_000, retry: 1 });
   const o = t.data?.organic;
   return (
     <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-ink-600 ring-1 ring-ink-200 backdrop-blur">
@@ -40,7 +40,7 @@ export function LiveTicker() {
 }
 
 export function StatsBand() {
-  const t = useQuery({ queryKey: ["traction"], queryFn: fetchTraction, refetchInterval: 15_000, retry: 1 });
+  const t = useQuery({ queryKey: ["traction"], queryFn: fetchTraction, refetchInterval: 60_000, retry: 1 });
   const o = t.data?.organic;
   const items = [
     { value: o?.merchantsWithSales ?? 0, label: "merchants recording sales" },

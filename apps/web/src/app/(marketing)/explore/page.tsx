@@ -12,7 +12,7 @@ import { Stagger, StaggerItem } from "@/components/motion";
 type Sort = "score" | "customers" | "recent";
 
 export default function ExplorePage() {
-  const q = useQuery({ queryKey: ["directory"], queryFn: fetchMerchants, refetchInterval: 20_000 });
+  const q = useQuery({ queryKey: ["directory"], queryFn: fetchMerchants, refetchInterval: 60_000 });
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<Sort>("score");
 

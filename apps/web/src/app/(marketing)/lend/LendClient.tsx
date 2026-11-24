@@ -71,7 +71,7 @@ export function LendClient() {
     query: { enabled: Boolean(vault && shares !== undefined) },
   });
 
-  const book = useQuery({ queryKey: ["credit-book"], queryFn: fetchCreditBook, refetchInterval: 30_000 });
+  const book = useQuery({ queryKey: ["credit-book"], queryFn: fetchCreditBook, refetchInterval: 120_000 });
 
   const [amount, setAmount] = useState("");
   const [agreed, setAgreed] = useState(false);

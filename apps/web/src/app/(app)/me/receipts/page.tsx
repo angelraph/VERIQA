@@ -29,7 +29,7 @@ export default function MyReceiptsPage() {
       return lists.flat().sort((x, y) => new Date(y.timestamp).getTime() - new Date(x.timestamp).getTime());
     },
     enabled: addresses.length > 0,
-    refetchInterval: 10_000,
+    refetchInterval: 30_000,
   });
   const list = receipts.data ?? [];
 

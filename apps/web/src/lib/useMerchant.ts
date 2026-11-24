@@ -26,7 +26,7 @@ export function useMerchant(address?: `0x${string}`) {
     queryKey: ["merchant", address],
     queryFn: () => fetchMerchant(address!),
     enabled: Boolean(address),
-    refetchInterval: 10_000,
+    refetchInterval: 60_000,
   });
 
   const row = onChain.data as readonly [string, string, string, bigint, boolean, boolean] | undefined;

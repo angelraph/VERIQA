@@ -16,7 +16,7 @@ export function useShop() {
     queryKey: ["sales", id.address],
     queryFn: () => fetchMerchantSales(id.address!, 500),
     enabled: Boolean(id.address && m.registered),
-    refetchInterval: 8_000,
+    refetchInterval: 30_000,
   });
   return { id, m, sales: sales.data ?? [], salesLoading: sales.isLoading };
 }

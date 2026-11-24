@@ -33,7 +33,7 @@ function Capital() {
   const step = useReadContract({ address: ADDR.pool, abi: workingCapitalPoolAbi, functionName: "ladderStep", args, query: q });
   const vol = useReadContract({ address: ADDR.pool, abi: workingCapitalPoolAbi, functionName: "eligibleVolume", args, query: q });
   const params = useReadContract({ address: ADDR.pool, abi: workingCapitalPoolAbi, functionName: "params", query: { enabled: Boolean(ADDR.pool) } });
-  const history = useQuery({ queryKey: ["advances", id.address], queryFn: () => fetchMerchantAdvances(id.address!), enabled: Boolean(id.address), refetchInterval: 10_000 });
+  const history = useQuery({ queryKey: ["advances", id.address], queryFn: () => fetchMerchantAdvances(id.address!), enabled: Boolean(id.address), refetchInterval: 60_000 });
 
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);

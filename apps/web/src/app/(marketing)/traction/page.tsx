@@ -15,7 +15,7 @@ import { CountUp, Reveal } from "@/components/motion";
 import { Testimonials } from "@/components/site/Testimonials";
 
 export default function TractionPage() {
-  const t = useQuery({ queryKey: ["traction"], queryFn: fetchTraction, refetchInterval: 10_000 });
+  const t = useQuery({ queryKey: ["traction"], queryFn: fetchTraction, refetchInterval: 30_000 });
   const receiptsCount = useReadContract({ address: ADDR.receipts, abi: paymentReceiptsAbi, functionName: "nextReceiptId", query: { enabled: Boolean(ADDR.receipts), refetchInterval: 10_000 } });
   const lent = useReadContract({ address: ADDR.pool, abi: workingCapitalPoolAbi, functionName: "totalLent", query: { enabled: Boolean(ADDR.pool) } });
   const repaid = useReadContract({ address: ADDR.pool, abi: workingCapitalPoolAbi, functionName: "totalRepaid", query: { enabled: Boolean(ADDR.pool) } });
@@ -54,7 +54,7 @@ export default function TractionPage() {
             <div className="mt-6">
               <SplitBar
                 parts={[
-                  { label: "Settled on-chain", value: o?.settledReceipts ?? 0, color: "#7c3aed" },
+                  { label: "Paid in crypto", value: o?.settledReceipts ?? 0, color: "#7c3aed" },
                   { label: "Cash, confirmed", value: o?.attestedReceipts ?? 0, color: "#5f8dff" },
                 ]}
               />

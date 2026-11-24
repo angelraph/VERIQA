@@ -66,7 +66,7 @@ function Statements() {
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3 border-t border-ink-100 pt-5 text-sm sm:grid-cols-4">
           <Sum k="Sales" v={String(inRange.length)} />
-          <Sum k="Settled on-chain" v={formatUSD(settledSum)} />
+          <Sum k="Paid in crypto" v={formatUSD(settledSum)} />
           <Sum k="Cash, info only" v={formatUSD(cashSum)} />
           <Sum k="Closing balance" v={formatUSD(settledSum - repaid)} />
         </div>

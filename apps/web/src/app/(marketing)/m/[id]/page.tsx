@@ -14,7 +14,7 @@ import { AreaChart } from "@/components/Sparkline";
 import { Reveal } from "@/components/motion";
 
 const COMPONENTS: { key: keyof ScoreBreakdown; label: string; max: number }[] = [
-  { key: "settledComponent", label: "On-chain sales", max: 250 },
+  { key: "settledComponent", label: "Sales paid in crypto", max: 250 },
   { key: "attestedComponent", label: "Cash sales confirmed by customers", max: 150 },
   { key: "breadthComponent", label: "Distinct customers", max: 150 },
   { key: "repeatComponent", label: "Returning customers", max: 150 },
@@ -26,8 +26,8 @@ const COMPONENTS: { key: keyof ScoreBreakdown; label: string; max: number }[] = 
 
 export default function MerchantProfilePage({ params }: { params: { id: string } }) {
   const id = decodeURIComponent(params.id);
-  const merchant = useQuery({ queryKey: ["merchant", id], queryFn: () => fetchMerchant(id), refetchInterval: 15_000 });
-  const sales = useQuery({ queryKey: ["sales", id], queryFn: () => fetchMerchantSales(id, 50), enabled: Boolean(merchant.data), refetchInterval: 15_000 });
+  const merchant = useQuery({ queryKey: ["merchant", id], queryFn: () => fetchMerchant(id), refetchInterval: 60_000 });
+  const sales = useQuery({ queryKey: ["sales", id], queryFn: () => fetchMerchantSales(id, 50), enabled: Boolean(merchant.data), refetchInterval: 60_000 });
   const advances = useQuery({ queryKey: ["advances", id], queryFn: () => fetchMerchantAdvances(id), enabled: Boolean(merchant.data) });
   const history = useQuery({ queryKey: ["history", id], queryFn: () => fetchScoreHistory(id), enabled: Boolean(merchant.data) });
 
@@ -83,7 +83,7 @@ export default function MerchantProfilePage({ params }: { params: { id: string }
       </Reveal>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="On-chain sales" value={b.settledTxCount} hint={formatUSD(b.settledVolumeUSD)} />
+        <Stat label="Paid in crypto" value={b.settledTxCount} hint={formatUSD(b.settledVolumeUSD)} />
         <Stat label="Cash sales confirmed" value={b.attestedTxCount} hint={`${formatUSD(b.attestedVolumeUSD)} counted toward score`} />
         <Stat label="Customers" value={b.distinctCustomers} hint={`${Math.round(b.repeatCustomerRate * 100)}% came back`} />
         <Stat label="Advances repaid" value={m.credit.advancesRepaid} hint={m.credit.defaults ? `${m.credit.defaults} defaulted` : "No defaults"} />

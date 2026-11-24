@@ -56,7 +56,7 @@ function Sell() {
     queryKey: ["sales-watch", id.address, offer?.saleRef],
     queryFn: () => fetchMerchantSales(id.address!, 20),
     enabled: Boolean(offer && id.address),
-    refetchInterval: 1_500,
+    refetchInterval: 3_000,
   });
   const indexed = offer ? watch.data?.find((s) => s.invoiceRef.toLowerCase() === offer.saleRef.toLowerCase()) : undefined;
   const onChain = useReadContract({

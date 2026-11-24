@@ -65,7 +65,7 @@ function Sales() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Total" value={money.fmt(total).split(" (")[0]} hint={salesCount(rows.length)} />
-        <Stat label="Settled on-chain" value={formatUSD(settled.reduce((a, r) => a + r.amountUSD, 0))} hint={salesCount(settled.length)} />
+        <Stat label="Paid in crypto" value={formatUSD(settled.reduce((a, r) => a + r.amountUSD, 0))} hint={salesCount(settled.length)} />
         <Stat label="Cash, confirmed" value={formatUSD(total - settled.reduce((a, r) => a + r.amountUSD, 0))} hint={salesCount(rows.length - settled.length)} />
         <Stat label="Sent to your advance" value={formatUSD(repaid)} hint="automatic repayments" />
       </div>

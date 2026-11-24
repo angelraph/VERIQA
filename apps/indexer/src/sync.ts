@@ -10,7 +10,7 @@ import { PrismaRepository } from "./prismaRepository";
 ///   index at the same time. A stale lease (crashed instance) expires.
 /// - Bounded: a request waits at most `maxWaitMs` for the catch-up, then
 ///   answers with what is already indexed while the catch-up finishes.
-const MIN_INTERVAL_MS = 4_000;
+const MIN_INTERVAL_MS = 45_000;
 const LEASE_MS = 25_000;
 const LOCK_KEY = "syncLease";
 

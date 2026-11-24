@@ -166,7 +166,7 @@ function Overview() {
             {(b?.distinctCustomers ?? 0) < 20 ? (
               <Tip>Ask every customer to confirm their sale. More customers count most.</Tip>
             ) : (b?.settledTxCount ?? 0) < 10 ? (
-              <Tip>Take some payments in QUSDC or QIE. On-chain sales weigh the most.</Tip>
+              <Tip>Take some payments in QUSDC or QIE. Sales paid in crypto weigh the most.</Tip>
             ) : !m.qieName ? (
               <Tip>Link a .qie name so customers can pay you by name.</Tip>
             ) : (
@@ -281,7 +281,7 @@ function Overview() {
 }
 
 function WeeklyInsight({ id }: { id: string }) {
-  const q = useQuery({ queryKey: ["insight", id], queryFn: () => fetchLiveInsight(id), refetchInterval: 30_000 });
+  const q = useQuery({ queryKey: ["insight", id], queryFn: () => fetchLiveInsight(id), refetchInterval: 120_000 });
   if (!q.data) return null;
   const s = q.data.stats;
   return (
