@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchLiveInsight } from "@/lib/api";
 import { InstallApp } from "@/components/InstallApp";
 import { YourMoney } from "@/components/app/YourMoney";
+import { useCustomerNames } from "@/lib/customerNames";
 
 const DAY = 86_400_000;
 
@@ -40,6 +41,7 @@ export default function DashboardPage() {
 
 function Overview() {
   const { id, m, sales } = useShop();
+  const { nameOf } = useCustomerNames(id.address);
   const money = useMoney();
   const [range, setRange] = useState<7 | 30>(30);
 
@@ -216,14 +218,14 @@ function Overview() {
           </div>
         </Card>
         <Card>
-          <h2 className="font-semibold">Top customers</h2>
+          <div className="flex items-center justify-between"><h2 className="font-semibold">Top customers</h2><Link href="/dashboard/customers" className="link text-sm">All customers</Link></div>
           {top.length ? (
             <div className="mt-3 divide-y divide-ink-100 text-sm">
               {top.map(([c, v], i) => (
                 <div key={c} className="flex items-center justify-between py-2">
                   <span className="flex items-center gap-2">
                     <span className="grid h-6 w-6 place-items-center rounded-full bg-violet-50 text-[11px] font-semibold text-violet-700">{i + 1}</span>
-                    <span className="font-mono text-xs text-ink-500">{shorten(c)}</span>
+                    {nameOf(c) ? <span className="font-medium text-ink-800">{nameOf(c)}</span> : <span className="font-mono text-xs text-ink-500">{shorten(c)}</span>}
                   </span>
                   <span className="font-semibold tabular-nums">{formatUSD(v)}</span>
                 </div>
@@ -249,7 +251,7 @@ function Overview() {
                 <Link href={`/receipt/${s.receiptId}`} className="flex items-center justify-between gap-3 px-5 py-3 transition hover:bg-canvas sm:px-6">
                   <div className="flex min-w-0 items-center gap-3">
                     <TierBadge tier={s.tier} method={s.method} />
-                    <span className="hidden font-mono text-xs text-ink-500 sm:inline">{shorten(s.payer)}</span>
+                    {nameOf(s.payer) ? <span className="truncate text-sm font-medium text-ink-800">{nameOf(s.payer)}</span> : <span className="hidden font-mono text-xs text-ink-500 sm:inline">{shorten(s.payer)}</span>}
                   </div>
                   <div className="text-right">
                     <div className="font-semibold tabular-nums">{money.fmt(s.amountUSD).split(" (")[0]}</div>

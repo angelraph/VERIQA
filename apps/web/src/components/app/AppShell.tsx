@@ -17,6 +17,7 @@ const ICONS: Record<string, ReactNode> = {
   capital: <path d="M12 3v18M17 7H9.5a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H6" />,
   statements: <path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6" />,
   receipts: <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6" />,
+  customers: <path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M20 19v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 5.15a3 3 0 0 1 0 5.7" />,
   poster: <path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h3" />,
   settings: <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />,
 };
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/dashboard", label: "nav.home", icon: "home", exact: true },
   { href: "/sell", label: "nav.sell", icon: "sell" },
   { href: "/dashboard/sales", label: "nav.sales", icon: "sales" },
+  { href: "/dashboard/customers", label: "nav.customers", icon: "customers" },
   { href: "/dashboard/capital", label: "nav.capital", icon: "capital" },
   { href: "/dashboard/statements", label: "nav.statements", icon: "statements" },
   { href: "/me/receipts", label: "nav.receipts", icon: "receipts" },

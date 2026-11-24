@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { NameCustomer } from "@/components/app/NameCustomer";
 import { QRCodeSVG } from "qrcode.react";
 import { parseUnits } from "viem";
 import { useQuery } from "@tanstack/react-query";
@@ -150,6 +151,7 @@ function Sell() {
               <div className="mt-3 text-sm">
                 {confirmed.txHash ? <TxLink hash={confirmed.txHash} label={t("sell.recorded")} /> : <span className="text-ink-500">{t("sell.recorded")}</span>}
               </div>
+              {indexed && <NameCustomer payer={indexed.payer} />}
               <Button
                 className="mt-6 w-full"
                 onClick={() => {
