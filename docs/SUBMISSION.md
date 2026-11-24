@@ -15,6 +15,7 @@ Veriga turns everyday sales into a credit record, and that record into small loa
 - **Customers with crypto pay directly** in QUSDC, or in QIE that swaps to QUSDC through QIEDEX inside the same transaction, checked against the QIE Oracle.
 - **Every receipt feeds an open trust score.** Anyone can rebuild it from chain data, and the hash of its inputs is checkpointed on-chain.
 - **The score unlocks working capital.** Advances are sized from real on-chain sales only. While one is open, the contract sends a share of every new payment back to the pool automatically, in the same transaction. Repay on time and the next limit doubles. Defaults are public.
+- **Anyone can lend.** Lenders deposit QUSDC into a lender vault, earn the fees shops pay, and withdraw whenever the money isn't out with shops. The vault is the pool's only admin, so nobody but a lender can move lender money. Not even us: the team wallet gave up its admin role on-chain.
 - **Lenders can check everything.** Each shop has a public profile under its .qie name, and statements export as CSV and ISO 20022 camt.053, a format banks already read.
 
 A few things I'm really glad made it in:
@@ -24,7 +25,8 @@ A few things I'm really glad made it in:
 - **A poster for the counter.** A printable QR that customers scan to pay or check the shop's record.
 - **Installs like an app.** Add it to the home screen and it opens straight to the Sell screen.
 - **A weekly note.** Every Monday, a few plain sentences about the shop's week, worked out from recorded sales only. No AI guesses.
-- **A real pool admin page.** The pool owner adds liquidity, pauses lending and changes the rules, but only inside hard limits written into the contract.
+- **Lend to shops.** A page where anyone lends from their wallet, sees what their share is worth, withdraws, and reads every advance the pool has made. While Veriga is new, the app caps each wallet at $100 and asks lenders to confirm they understand the risks.
+- **Slow, public rule changes.** New lending terms wait a full day on-chain before anyone can apply them, and pausing stops new advances without ever trapping lenders' money.
 
 ## Honest by design
 
@@ -32,7 +34,7 @@ A dishonest seller could invent customer keys, so I split evidence into two kind
 
 ## How we used QIE
 
-- **Mainnet:** five source-verified contracts, and every receipt lives on chain 1990.
+- **Mainnet:** six source-verified contracts, and every receipt lives on chain 1990.
 - **QUSDC:** settlement, lending, and the unit every score is counted in.
 - **QIEDEX:** pay in QIE and it swaps to exact QUSDC inside the payment.
 - **QIE Oracle:** keeps that swap within 3% of the QIE/USD price and refuses stale data.
@@ -43,15 +45,15 @@ A dishonest seller could invent customer keys, so I split evidence into two kind
 
 ## How we built it
 
-Five Solidity contracts (0.8.20, OpenZeppelin 5): MerchantRegistry, PaymentReceipts, WorkingCapitalPool, TrustScoreOracle and an ERC-2771 forwarder so merchants never need gas. A cash sale carries two EIP-712 signatures, the seller's SaleOffer and the customer's SaleConfirmation, so the relayer can't record anything on its own.
+Six Solidity contracts (0.8.20, OpenZeppelin 5): MerchantRegistry, PaymentReceipts, WorkingCapitalPool, TrustScoreOracle, an ERC-2771 forwarder so merchants never need gas, and LenderVault, an ERC-4626 vault that is the pool's only admin. A cash sale carries two EIP-712 signatures, the seller's SaleOffer and the customer's SaleConfirmation, so the relayer can't record anything on its own.
 
 The backend (Express, Prisma, viem) runs inside the Next.js 14 app on Vercel's free tier, with Neon Postgres. It indexes every contract event, computes scores, builds statements and relays signed requests with an allowlist and rate limits. A daily cron syncs events, checkpoints scores on-chain and writes the Monday notes.
 
 ## Proof on mainnet
 
-I ran the whole loop with real money. A shop opened with no wallet and no gas. A customer confirmed a cash sale from their own phone. Another paid in QUSDC. Scores were checkpointed on-chain. The pool was funded, a shop took an advance of 0.60 QUSDC, and its next sale paid back 0.618 QUSDC, fee included, automatically in the same transaction. Then its limit doubled. The amounts are tiny on purpose, so the full cycle could be proven for almost nothing. Every transaction link is in the README.
+I ran the whole loop with real money. A shop opened with no wallet and no gas. A customer confirmed a cash sale from their own phone. Another paid in QUSDC. Scores were checkpointed on-chain. The pool was funded, a shop took an advance of 0.60 QUSDC, and its next sale paid back 0.618 QUSDC, fee included, automatically in the same transaction. Then its limit doubled. After that, the pool's admin role moved to the lender vault and the team wallet renounced it, and the team came back in as an ordinary lender. The amounts are tiny on purpose, so the full cycle could be proven for almost nothing. Every transaction link is in the README.
 
-Testing: 43 contract tests, 2 tests against a fork of live QIE mainnet (a real QIEDEX swap inside the oracle bound, and linking a real .qie name), and 86 backend tests.
+Testing: 53 contract tests (including the lender vault's deposits, withdrawals, default write-downs and owner limits), 2 tests against a fork of live QIE mainnet (a real QIEDEX swap inside the oracle bound, and linking a real .qie name), and 86 backend tests.
 
 ## Challenges we ran into
 
