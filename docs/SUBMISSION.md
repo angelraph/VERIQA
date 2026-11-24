@@ -22,7 +22,6 @@ A few things I'm really glad made it in:
 
 - **Your money.** Every shop sees the QUSDC and QIE in its own wallet and can send it anywhere: its QIE Wallet, family, or an exchange to turn it into naira. A phone-only shop signs the transfer itself, and if it has no QIE for the fee, Veriga adds a tiny capped top-up first.
 - **Customers.** Each customer's purchases, spend, first and last visit, and who the regulars are. The shop can name customers ("Mama Ngozi"), and those names stay only on the shop's phone, never on the blockchain.
-
 - **Try it on one phone.** A new seller (or a judge) can play both sides on one device before asking a real customer.
 - **Five languages.** English, Nigerian Pidgin, Yoruba, Igbo and Hausa on the screens sellers and customers use most.
 - **A poster for the counter.** A printable QR that customers scan to pay or check the shop's record.
@@ -56,7 +55,9 @@ The backend (Express, Prisma, viem) runs inside the Next.js 14 app on Vercel's f
 
 I ran the whole loop with real money. A shop opened with no wallet and no gas. A customer confirmed a cash sale from their own phone. Another paid in QUSDC. Scores were checkpointed on-chain. The pool was funded, a shop took an advance of 0.60 QUSDC, and its next sale paid back 0.618 QUSDC, fee included, automatically in the same transaction. Then its limit doubled. After that, the pool's admin role moved to the lender vault and the team wallet renounced it, and the team came back in as an ordinary lender. The amounts are tiny on purpose, so the full cycle could be proven for almost nothing. Every transaction link is in the README.
 
-Testing: 53 contract tests (including the lender vault's deposits, withdrawals, default write-downs and owner limits), 2 tests against a fork of live QIE mainnet (a real QIEDEX swap inside the oracle bound, and linking a real .qie name), and 86 backend tests.
+Since launch, shops run by people outside the team have opened on Veriga and recorded customer-confirmed sales. The traction page counts them live and leaves out every team and test wallet.
+
+Testing: 53 contract tests (including the lender vault's deposits, withdrawals, default write-downs and owner limits), 2 tests against a fork of live QIE mainnet (a real QIEDEX swap inside the oracle bound, and linking a real .qie name), and 90 backend tests.
 
 ## Challenges we ran into
 
