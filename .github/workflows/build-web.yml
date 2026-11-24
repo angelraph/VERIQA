@@ -1,0 +1,44 @@
+name: Build the web app for Render
+
+# Render's free machine has 512 MB, which isn't enough to compile the app.
+# GitHub builds it here instead and publishes the finished .next folder,
+# named after the commit. Render's build step downloads that and runs it.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_INDEXER_API_URL: /api
+      NEXT_PUBLIC_SITE_URL: https://veriga.xyz
+      NEXT_PUBLIC_FORWARDER_ADDRESS: "0x6F859A4FC901873a85b8691D25A941A3fe605DBF"
+      NEXT_PUBLIC_MERCHANT_REGISTRY_ADDRESS: "0x6005A1e73A6cCd2759eC5bC9f74F80997393cc22"
+      NEXT_PUBLIC_PAYMENT_RECEIPTS_ADDRESS: "0x4e1A43B27F83532d1547C64b353Cb23CDd7A490E"
+      NEXT_PUBLIC_TRUST_SCORE_ORACLE_ADDRESS: "0x857c34aCcD229E270b9790dfB6647D6a5fC9BE81"
+      NEXT_PUBLIC_WORKING_CAPITAL_POOL_ADDRESS: "0xbeb5d332a5C6dDeb117f3cC47fAb74F41f8A4ECA"
+      NEXT_PUBLIC_LENDER_VAULT_ADDRESS: "0x9bDDd37A74B26DEE53Ab1911a171Dc51ecefc647"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Build
+        run: npm run build -w apps/web
+      - name: Package the build
+        run: tar --exclude='.next/cache' -czf "next-build-${GITHUB_SHA}.tar.gz" -C apps/web .next
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view render-build >/dev/null 2>&1 || gh release create render-build --title "Render build" --notes "Prebuilt web app for Render, one file per commit." --prerelease
+          gh release upload render-build "next-build-${GITHUB_SHA}.tar.gz" --clobber
