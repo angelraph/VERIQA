@@ -177,7 +177,7 @@ export default function PoolAdminPage() {
   const FIELDS: { key: string; label: string; hint: string }[] = [
     { key: "baseCreditLimit", label: "First advance limit (USD)", hint: "Doubles after each on-time repayment" },
     { key: "maxLadderSteps", label: "Ladder steps", hint: "Hard limit 8" },
-    { key: "advancePct", label: "Advance size (% of monthly settled sales)", hint: "Hard limit 50%" },
+    { key: "advancePct", label: "Advance size (% of monthly sales paid in crypto)", hint: "Hard limit 50%" },
     { key: "feePct", label: "Flat fee (%)", hint: "Hard limit 10%" },
     { key: "repayPct", label: "Repayment share of each sale (%)", hint: "Between 5% and 50%" },
     { key: "termDays", label: "Term (days)", hint: "Between 7 and 180" },

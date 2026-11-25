@@ -165,7 +165,7 @@ export default function Home() {
             {[
               { n: "01", t: "Build a record", b: "Every sale, cash or crypto, becomes a receipt the customer confirmed. Sales paid in crypto count most. All of them are recorded on QIE mainnet." },
               { n: "02", t: "Earn a score", b: "An open formula weighs sales, distinct customers, regulars and consistency. Fake customers buy very little." },
-              { n: "03", t: "Take an advance", b: "Sized from settled sales and paid back automatically from a share of each new sale. Each repaid loan doubles your limit." },
+              { n: "03", t: "Take an advance", b: "Sized from sales paid in crypto and paid back automatically from a share of each new sale. Each repaid loan doubles your limit." },
             ].map((s) => (
               <StaggerItem key={s.n} className="surface p-7">
                 <div className="font-mono text-sm text-violet-600">{s.n}</div>
@@ -194,7 +194,7 @@ export default function Home() {
           <Reveal delay={0.08} className="surface overflow-hidden p-8">
             <div className="eyebrow">For lenders</div>
             <h3 className="mt-3 text-2xl font-semibold">Underwrite on evidence you can check yourself.</h3>
-            <p className="mt-3 text-ink-500">Microfinance banks, cooperatives and on-chain lenders read the same proof, from the chain, without asking us.</p>
+            <p className="mt-3 text-ink-500">Microfinance banks, cooperatives and on-chain lenders can read the same proof, straight from the chain, without asking us.</p>
             <Link href="/lenders" className="mt-5 inline-flex rounded-full bg-ink-900 px-5 py-3 text-sm font-semibold text-white">
               Veriga for lenders ›
             </Link>

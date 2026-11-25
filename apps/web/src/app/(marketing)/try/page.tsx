@@ -101,7 +101,7 @@ export default function TryPage() {
             <div>
               <h3 className="font-semibold">Contracts</h3>
               <p className="mt-2 text-sm leading-6 text-ink-500">
-                Five contracts, all source-verified on the QIE explorer. Addresses are on the <Link href="/developers#contracts" className="link">developer page</Link>.
+                Six contracts, all source-verified on the QIE explorer. Addresses are on the <Link href="/developers#contracts" className="link">developer page</Link>.
               </p>
             </div>
             <div>

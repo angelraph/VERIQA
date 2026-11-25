@@ -7,11 +7,11 @@ import { ScoreMock, VerifyMock, StatementMock, CapitalMock } from "@/components/
 export const metadata: Metadata = { title: "For lenders" };
 
 const SAFEGUARDS = [
-  ["Settled volume only", "Advance size is computed on-chain from QUSDC that actually moved through Veriga. Cash attestations never touch it."],
+  ["Crypto sales only", "Advance size is computed on-chain from QUSDC that actually moved through Veriga. Cash attestations never touch it."],
   ["Per-payer caps", "Any single wallet can add at most $200 to a merchant's monthly volume, so one rich friend can't create a borrower."],
   ["Distinct payers", "A merchant needs at least five different paying customers in the month before any advance."],
   ["Credit ladder", "First advance capped at $100. Each on-time repayment doubles the cap, so losses from any one identity stay bounded."],
-  ["Automatic repayment", "A fixed share of every new settled sale goes to the pool before the merchant is paid."],
+  ["Automatic repayment", "A fixed share of every new sale paid in crypto goes to the pool before the merchant is paid."],
   ["Public defaults", "Anyone can flag a past-due advance. The default is permanent on the merchant's record and resets their ladder."],
 ];
 
@@ -70,7 +70,7 @@ export default function LendersPage() {
               <div className="eyebrow">Repayment that runs itself</div>
               <h2 className="mt-3 text-3xl font-semibold">The merchant doesn&apos;t have to remember. The contract does.</h2>
               <p className="mt-4 leading-7 text-ink-500">
-                While an advance is open, the PaymentReceipts contract routes the repayment share of every settled sale to the pool in the same
+                While an advance is open, the PaymentReceipts contract routes the repayment share of every sale paid in crypto to the pool in the same
                 transaction, then pays the merchant the rest. Fees are repaid first. When the balance hits zero, the advance closes and the
                 merchant&apos;s ladder steps up.
               </p>

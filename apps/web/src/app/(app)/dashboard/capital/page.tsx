@@ -85,7 +85,7 @@ function Capital() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Credit limit" value={formatUSD(usd(limit.data as bigint | undefined))} hint={`Step ${ladder} of ${maxSteps}`} />
-        <Stat label="Settled sales this month" value={formatUSD(usd(volume))} hint="counts toward your limit" />
+        <Stat label="Sales paid in crypto this month" value={formatUSD(usd(volume))} hint="counts toward your limit" />
         <Stat label="Paying customers this month" value={`${payers}`} hint={`${minPayers} needed`} />
         <Stat label="Advances repaid" value={history.data?.filter((h) => h.status === "closed").length ?? 0} hint="each one doubles your limit" />
       </div>
@@ -126,7 +126,7 @@ function Capital() {
             <h2 className="font-semibold">Get an advance</h2>
             {maxUSD > 0 ? (
               <>
-                <p className="mt-1 text-sm text-ink-500">Based on your settled sales, you can borrow up to</p>
+                <p className="mt-1 text-sm text-ink-500">Based on your sales paid in crypto, you can borrow up to</p>
                 <div className="mt-2 font-display text-5xl font-bold text-gradient">{formatUSD(maxUSD)}</div>
                 <div className="mt-5 flex gap-2">
                   <input

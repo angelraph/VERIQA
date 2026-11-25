@@ -233,7 +233,7 @@ export function SalesChartMock() {
           <div className="font-semibold text-ink-900">218</div>
         </div>
         <div>
-          <div className="text-ink-500">Settled</div>
+          <div className="text-ink-500">Paid in crypto</div>
           <div className="font-semibold text-ink-900">$842.10</div>
         </div>
         <div>

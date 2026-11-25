@@ -70,7 +70,7 @@ export default function SecurityPage() {
         <Reveal>
           <div className="surface grid gap-8 p-8 sm:p-10 md:grid-cols-3">
             {[
-              ["Tested", "43 contract tests plus fork tests against live QIEDEX, the QIE Oracle and QIE ID. 84 indexer tests."],
+              ["Tested", "77 contract tests plus fork tests against live QIEDEX, the QIE Oracle and QIE ID. 90 indexer tests."],
               ["Open source", "Contracts, indexer and app are public. Anyone can read, run and check them."],
               ["Not yet audited", "Veriga has not had an external audit. Amounts and advance limits are kept small until it does."],
             ].map(([t, b]) => (

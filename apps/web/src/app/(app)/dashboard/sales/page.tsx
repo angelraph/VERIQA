@@ -82,7 +82,7 @@ function Sales() {
                 }}
                 className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${filter === f ? "bg-ink-900 text-white" : "bg-canvas text-ink-600 ring-1 ring-ink-200"}`}
               >
-                {f === "all" ? "All" : f === "settled" ? "Settled" : "Cash, confirmed"}
+                {f === "all" ? "All" : f === "settled" ? "Paid in crypto" : "Cash, confirmed"}
               </button>
             ))}
             <select

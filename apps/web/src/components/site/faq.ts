@@ -43,7 +43,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     group: "Credit",
     q: "How much can I borrow?",
-    a: "Your first advance is capped at $100. After that it's the smallest of three numbers: 20% of your settled sales this month, your credit ladder limit, and what's available in the pool. Each advance you repay on time doubles your ladder limit, up to 32 times the starting amount.",
+    a: "Your first advance is capped at $100. After that it's the smallest of three numbers: 20% of your sales paid in crypto this month, your credit ladder limit, and what's available in the pool. Each advance you repay on time doubles your ladder limit, up to 32 times the starting amount.",
   },
   {
     group: "Credit",

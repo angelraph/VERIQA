@@ -27,10 +27,11 @@ const ENDPOINTS: [string, string, string][] = [
 
 const CONTRACTS: [string, string, string][] = [
   ["MerchantRegistry", contractAddresses.merchantRegistry, "Shops, profiles, QIE Pass attestations and verified .qie names."],
-  ["PaymentReceipts", contractAddresses.paymentReceipts, "Settled and attested sales, soulbound receipts, payWithQIE, auto-repayment routing."],
-  ["WorkingCapitalPool", contractAddresses.workingCapitalPool, "On-chain settled volume, credit ladder, advances, repayment and defaults."],
+  ["PaymentReceipts", contractAddresses.paymentReceipts, "Crypto and customer-confirmed cash sales, soulbound receipts, payWithQIE, auto-repayment routing."],
+  ["WorkingCapitalPool", contractAddresses.workingCapitalPool, "Volume paid in crypto, credit ladder, advances, repayment and defaults."],
   ["TrustScoreOracle", contractAddresses.trustScoreOracle, "Weekly score checkpoints with the inputs hash."],
   ["VerigaForwarder", contractAddresses.forwarder, "ERC-2771 forwarder for gas-free merchant actions."],
+  ["LenderVault", contractAddresses.lenderVault, "Anyone can lend QUSDC to the pool and withdraw their share. Rule changes wait a day."],
 ];
 
 const INTEGRATIONS: [string, string][] = [

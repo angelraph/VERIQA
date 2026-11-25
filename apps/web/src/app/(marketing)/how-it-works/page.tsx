@@ -24,7 +24,7 @@ const STEPS = [
   {
     n: "03",
     title: "Crypto payments settle on the spot",
-    body: "Customers who hold crypto can pay in QUSDC, or in QIE that is swapped to QUSDC through QIEDEX within the same transaction. The contract checks the swap against the QIE Oracle and refunds anything unspent. These sales count as Settled, the strongest kind of evidence.",
+    body: "Customers who hold crypto can pay in QUSDC, or in QIE that is swapped to QUSDC through QIEDEX within the same transaction. The contract checks the swap against the QIE Oracle and refunds anything unspent. These count as paid in crypto, the strongest kind of evidence.",
     detail: ["Oracle-guarded swap", "Unused QIE refunded", "Soulbound receipt to the payer"],
     mock: <PayMock />,
   },
@@ -38,7 +38,7 @@ const STEPS = [
   {
     n: "05",
     title: "The score unlocks working capital",
-    body: "Once a shop has enough paying customers and a strong enough score, it can draw an advance from the pool. The size comes from settled sales only. While it's open, a fixed share of each new sale goes straight back to the pool before the rest reaches the seller.",
+    body: "Once a shop has enough paying customers and a strong enough score, it can draw an advance from the pool. The size comes from sales paid in crypto only. While it's open, a fixed share of each new sale goes straight back to the pool before the rest reaches the seller.",
     detail: ["Starts at $100", "Doubles after each on-time repayment", "Repays itself from sales"],
     mock: <CapitalMock />,
   },

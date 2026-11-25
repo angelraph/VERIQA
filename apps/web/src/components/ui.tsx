@@ -95,7 +95,7 @@ export function Badge({ tone = "slate", children, className = "" }: { tone?: Ton
 
 export function TierBadge({ tier, method }: { tier: "settled" | "attested"; method?: "qusdc" | "qie" | "cash" }) {
   if (tier === "attested") return <Badge tone="amber">Cash, customer-confirmed</Badge>;
-  return <Badge tone="mint">Settled in {method === "qie" ? "QIE" : "QUSDC"}</Badge>;
+  return <Badge tone="mint">Paid in {method === "qie" ? "QIE" : "QUSDC"}</Badge>;
 }
 
 export function ScoreRing({ score, size = 132, label = "of 1000" }: { score: number; size?: number; label?: string }) {
