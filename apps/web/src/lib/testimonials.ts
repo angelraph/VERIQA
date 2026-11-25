@@ -9,6 +9,12 @@ export interface Testimonial {
 
 export const TESTIMONIALS: Testimonial[] = [
   {
+    quote: "The app is easy to use and keeps my daily sales organized & saves me from headaches.",
+    name: "A shop owner",
+    role: "Veriga merchant",
+    date: "2026-11-25",
+  },
+  {
     quote: "Wow, I love this app",
     name: "Elico Stores",
     role: "Shop owner",
