@@ -155,7 +155,7 @@ function Capital() {
               <div className="mt-4 space-y-3 text-sm">
                 <p className="text-ink-500">An offer appears here once all of these are true:</p>
                 <Req ok={payers >= BigInt(minPayers)} label={`${payers} of ${minPayers} distinct paying customers this month`} />
-                <Req ok={volume > 0n} label={`Settled on-chain sales this month (${formatUSD(usd(volume))})`} />
+                <Req ok={volume > 0n} label={`Sales paid in crypto this month (${formatUSD(usd(volume))})`} />
                 <Req ok={false} label={`Trust score of ${p ? String(p[0]) : "400"} or more`} />
                 <p className="rounded-xl bg-violet-50 p-3 text-violet-900 ring-1 ring-violet-100">
                   Cash sales raise your score but not your limit. That&apos;s what keeps fake customers from buying a bigger loan.

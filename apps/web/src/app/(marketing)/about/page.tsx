@@ -32,7 +32,7 @@ export default function AboutPage() {
           </p>
           <h2>What we believe</h2>
           <ul>
-            <li>Honest labels beat big numbers. Cash sales and on-chain sales are shown differently, always.</li>
+            <li>Honest labels beat big numbers. Cash sales and sales paid in crypto are shown differently, always. Both are recorded on QIE mainnet.</li>
             <li>The customer&apos;s side should cost nothing and take one tap, or it won&apos;t happen.</li>
             <li>Limits start small and grow with a track record, so mistakes stay small too.</li>
             <li>Anyone should be able to check our math.</li>

@@ -34,8 +34,8 @@ export default function TractionPage() {
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Stat label="Merchants with sales" value={<CountUp value={o?.merchantsWithSales ?? 0} />} hint={`${o?.merchantsRegistered ?? 0} registered, ${o?.activeMerchants7d ?? 0} active this week`} />
           <Stat label="Distinct customers" value={<CountUp value={o?.distinctCustomers ?? 0} />} hint={`${o?.repeatCustomers ?? 0} came back`} />
-          <Stat label="Sales recorded" value={<CountUp value={o?.receipts ?? 0} />} hint={`${o?.settledReceipts ?? 0} on-chain, ${o?.attestedReceipts ?? 0} cash confirmed`} />
-          <Stat label="Volume" value={<CountUp value={(o?.settledVolumeUSD ?? 0) + (o?.attestedVolumeUSD ?? 0)} format={(n) => formatUSD(n)} />} hint={`${formatUSD(o?.settledVolumeUSD ?? 0)} settled on-chain`} />
+          <Stat label="Sales recorded" value={<CountUp value={o?.receipts ?? 0} />} hint={`All on QIE mainnet: ${o?.attestedReceipts ?? 0} cash, ${o?.settledReceipts ?? 0} paid in crypto`} />
+          <Stat label="Volume" value={<CountUp value={(o?.settledVolumeUSD ?? 0) + (o?.attestedVolumeUSD ?? 0)} format={(n) => formatUSD(n)} />} hint={`${formatUSD(o?.attestedVolumeUSD ?? 0)} cash, ${formatUSD(o?.settledVolumeUSD ?? 0)} paid in crypto`} />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
@@ -82,6 +82,11 @@ export default function TractionPage() {
           <Reveal>
             <Card className="h-full">
               <h2 className="font-semibold">How we count</h2>
+              <p className="mt-2 text-sm leading-6 text-ink-500">
+                Every sale here is written to QIE mainnet, cash ones included. A cash sale is signed by the shop and by the customer&apos;s phone, so
+                nobody can change it later. &quot;Paid in crypto&quot; counts only sales where QUSDC or QIE actually moved. The first shops&apos; customers pay
+                in cash, so that number is still small.
+              </p>
               <p className="mt-2 text-sm leading-6 text-ink-500">{t.data?.method}</p>
               {t.data && (
                 <p className="mt-3 text-sm text-ink-500">

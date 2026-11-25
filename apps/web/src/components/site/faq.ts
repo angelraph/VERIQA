@@ -18,12 +18,12 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     group: "Credit",
     q: "How is the working capital repaid?",
-    a: "While an advance is open, the contract automatically sends a fixed share of every on-chain sale (10% by default) to the lending pool before the rest reaches you. You can also repay manually whenever you like. Nobody has to chase you, and you never miss a payment date by accident.",
+    a: "While an advance is open, the contract automatically sends a fixed share of every sale paid in crypto (10% by default) to the lending pool before the rest reaches you. You can also repay manually whenever you like. Nobody has to chase you, and you never miss a payment date by accident.",
   },
   {
     group: "Trust and data",
     q: "Can a merchant fake sales to borrow more?",
-    a: "Not in a way that pays. Cash sales confirmed by customers raise your score, but they never raise how much you can borrow. Advance limits come only from settled on-chain sales, with a cap on what any single payer can add, a minimum number of distinct paying customers, and a credit ladder that starts small. Paying yourself is ignored entirely.",
+    a: "Not in a way that pays. Cash sales confirmed by customers raise your score, but they never raise how much you can borrow. Advance limits come only from sales paid in crypto, with a cap on what any single payer can add, a minimum number of distinct paying customers, and a credit ladder that starts small. Paying yourself is ignored entirely.",
   },
   {
     group: "Trust and data",
@@ -53,7 +53,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     group: "Trust and data",
     q: "How is the trust score calculated?",
-    a: "From on-chain sales, distinct customers, regulars, weekly consistency, time on Veriga, identity checks and repayment history, minus penalties for one payer dominating your volume or for defaults. The formula is open source, and every week its inputs are hashed into a contract so anyone can recompute it.",
+    a: "From sales paid in crypto, cash sales confirmed by customers, distinct customers, regulars, weekly consistency, time on Veriga, identity checks and repayment history, minus penalties for one payer dominating your volume or for defaults. The formula is open source, and every week its inputs are hashed into a contract so anyone can recompute it.",
   },
   {
     group: "Trust and data",

@@ -74,7 +74,7 @@ export default function PricingPage() {
               </div>
             </div>
             <ul className="mt-6 space-y-2 text-sm text-white/70">
-              <li>Repaid automatically from 10% of each on-chain sale</li>
+              <li>Repaid automatically from 10% of each sale paid in crypto</li>
               <li>Repay early anytime, at no extra cost</li>
               <li>60-day term. Each on-time repayment doubles your limit</li>
             </ul>

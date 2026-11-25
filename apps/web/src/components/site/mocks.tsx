@@ -149,7 +149,7 @@ export function StatementMock() {
 
 export function ScoreMock() {
   const rows = [
-    ["On-chain sales", 72],
+    ["Paid in crypto", 72],
     ["Distinct customers", 88],
     ["Returning customers", 64],
     ["Weekly consistency", 92],

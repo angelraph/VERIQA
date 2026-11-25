@@ -31,7 +31,7 @@ const STEPS = [
   {
     n: "04",
     title: "Sales add up to a trust score",
-    body: "Every receipt feeds an open formula: on-chain sales, cash sales confirmed by customers, distinct customers, regulars, weekly consistency, time on Veriga, identity and repayment history. Each week the inputs are hashed into a contract so anyone can recheck the number.",
+    body: "Every receipt feeds an open formula: sales paid in crypto, cash sales confirmed by customers, distinct customers, regulars, weekly consistency, time on Veriga, identity and repayment history. Each week the inputs are hashed into a contract so anyone can recheck the number.",
     detail: ["Formula is open source", "Weekly on-chain checkpoint", "Penalties for washing and defaults"],
     mock: <ScoreMock />,
   },
@@ -88,7 +88,7 @@ export default function HowItWorksPage() {
           <div className="surface grid gap-8 p-8 sm:p-10 md:grid-cols-3">
             {[
               ["Why customers co-sign", "A seller can't invent a cash sale alone. Each one needs a second signature from a different key, and that key can only confirm each sale once."],
-              ["Why cash can't inflate loans", "Cash sales raise the score but never the borrowing limit. Limits come only from money that actually moved on-chain."],
+              ["Why cash can't inflate loans", "Cash sales raise the score but never the borrowing limit. Limits come only from sales paid in crypto, where the money really moved."],
               ["Why lenders can trust it", "They don't have to trust Veriga. The receipts, the formula and the weekly hash are all public and checkable."],
             ].map(([t, b]) => (
               <div key={t}>

@@ -107,7 +107,7 @@ export default function MerchantProfilePage({ params }: { params: { id: string }
             {(b.concentrationPenalty > 0 || b.defaultPenalty > 0) && (
               <div className="rounded-xl bg-rose-50 p-3 text-sm text-rose-600 ring-1 ring-rose-200">
                 Penalties: minus {Math.round(b.concentrationPenalty + b.defaultPenalty)}
-                {b.concentrationPenalty > 0 && `. One customer supplies ${Math.round(b.topPayerShare * 100)}% of on-chain volume`}
+                {b.concentrationPenalty > 0 && `. One customer supplies ${Math.round(b.topPayerShare * 100)}% of volume paid in crypto`}
                 {b.defaultPenalty > 0 && ". An advance went past due"}
               </div>
             )}

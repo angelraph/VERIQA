@@ -146,7 +146,7 @@ export default function Home() {
               tabs={[
                 { title: "Sell and get confirmed", body: "A keypad, a QR code and a one-tap confirmation. It works on any phone with a browser, even when the seller's own data is off.", panel: <PhoneConfirmMock />, href: "/merchants" },
                 { title: "See the business clearly", body: "Daily sales, distinct customers and who keeps coming back, so you spot good weeks and slow ones early.", panel: <SalesChartMock />, href: "/merchants" },
-                { title: "Unlock working capital", body: "Advances sized from real on-chain sales. Repay on time and your next limit doubles.", panel: <CapitalMock />, href: "/lenders" },
+                { title: "Unlock working capital", body: "Advances sized from real sales paid in crypto. Repay on time and your next limit doubles.", panel: <CapitalMock />, href: "/lenders" },
                 { title: "Show your record to anyone", body: "A public page under your .qie name with your score, how it's built and every receipt behind it.", panel: <ScoreMock />, href: "/explore" },
               ]}
             />
@@ -163,7 +163,7 @@ export default function Home() {
           </Reveal>
           <Stagger className="mt-12 grid gap-4 md:grid-cols-3">
             {[
-              { n: "01", t: "Build a record", b: "Every sale, cash or crypto, becomes a receipt the customer confirmed. On-chain sales count most." },
+              { n: "01", t: "Build a record", b: "Every sale, cash or crypto, becomes a receipt the customer confirmed. Sales paid in crypto count most. All of them are recorded on QIE mainnet." },
               { n: "02", t: "Earn a score", b: "An open formula weighs sales, distinct customers, regulars and consistency. Fake customers buy very little." },
               { n: "03", t: "Take an advance", b: "Sized from settled sales and paid back automatically from a share of each new sale. Each repaid loan doubles your limit." },
             ].map((s) => (

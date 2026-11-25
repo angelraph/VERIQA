@@ -25,7 +25,7 @@ export default function ReceiptPage({ params }: { params: { id: string } }) {
   const rows: [string, React.ReactNode][] = [
     ["Shop", <Link key="s" href={`/m/${d.merchant.qieName ?? d.merchant.wallet}`} className="font-medium text-violet-700 hover:underline">{shop}</Link>],
     ["Date", new Date(d.timestamp).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })],
-    ["Evidence", d.tier === "settled" ? `Settled on-chain in ${d.method === "qie" ? "QIE, swapped to QUSDC" : "QUSDC"}` : "Cash sale, confirmed by the customer"],
+    ["Evidence", d.tier === "settled" ? `Paid in ${d.method === "qie" ? "QIE, swapped to QUSDC" : "QUSDC"}, recorded on QIE mainnet` : "Cash sale, confirmed by the customer, recorded on QIE mainnet"],
     ["Customer", <a key="c" href={explorerAddress(d.payer)} target="_blank" rel="noreferrer" className="font-mono text-xs text-ink-500 hover:text-ink-900">{d.payer.slice(0, 10)}…{d.payer.slice(-6)}</a>],
     ["Block", Number(d.blockNumber).toLocaleString()],
   ];
@@ -50,7 +50,7 @@ export default function ReceiptPage({ params }: { params: { id: string } }) {
             <div className="text-sm text-ink-500">Amount</div>
             <div className="mt-1 font-display text-5xl font-bold">{formatUSD(d.amountUSD)}</div>
             <div className="mt-3 flex justify-center">
-              <Badge tone={d.tier === "settled" ? "mint" : "amber"}>{d.tier === "settled" ? "Paid on-chain" : "Cash, customer-confirmed"}</Badge>
+              <Badge tone={d.tier === "settled" ? "mint" : "amber"}>{d.tier === "settled" ? "Paid in crypto" : "Cash, customer-confirmed"}</Badge>
             </div>
           </div>
           <dl className="mt-5 divide-y divide-ink-100 text-sm">
