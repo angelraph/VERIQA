@@ -34,7 +34,7 @@ A few things I'm really glad made it in:
 
 ## Honest by design
 
-A dishonest seller could invent customer keys, so I split evidence into two kinds. Sales where money really moved on-chain are "settled" and count fully. Cash sales co-signed by a customer are "customer-confirmed": they help the score, they're capped per customer per week, and they can never raise how much a shop can borrow. In the bank statement they show up as information-only lines.
+A dishonest seller could invent customer keys, so I split evidence into two kinds. Both kinds are recorded on QIE mainnet. Sales paid in crypto are "settled" and count fully. Cash sales co-signed by a customer are "customer-confirmed": they help the score, they're capped per customer per week, and they can never raise how much a shop can borrow. In the bank statement they show up as information-only lines.
 
 ## How we used QIE
 
@@ -57,14 +57,14 @@ The backend (Express, Prisma, viem) runs inside the Next.js 14 app on Vercel, wi
 
 I ran the whole loop with real money. A shop opened with no wallet and no gas. A customer confirmed a cash sale from their own phone. Another paid in QUSDC. Scores were checkpointed on-chain. The pool was funded, a shop took an advance of 0.60 QUSDC, and its next sale paid back 0.618 QUSDC, fee included, automatically in the same transaction. Then its limit doubled. After that, the pool's admin role moved to the lender vault and the team wallet renounced it, and the team came back in as an ordinary lender. The amounts are tiny on purpose, so the full cycle could be proven for almost nothing. Every transaction link is in the README.
 
-Since launch, shops run by people outside the team have opened on Veriga and recorded customer-confirmed sales. Eight of them have sent feedback so far. Silverglam called it "a game changer for my business", and others said "very fast and swift", "really nice and user explanatory" and "well built". The traction page counts them live and leaves out every team and test wallet.
+Since launch, shops run by people outside the team have opened on Veriga and recorded real customer-confirmed sales. By 26 November, 24 shops had signed up and 17 of them were recording sales: 26 sales worth $334.85, confirmed by 22 different customers, 4 of whom came back to buy again. Every one of those sales is on QIE mainnet. Ten shop owners have sent feedback so far. Silverglam called it "a game changer for my business", and others said "very fast and swift", "really nice and user explanatory" and "keeps my daily sales organized & saves me from headaches". The traction page counts them live and leaves out every team and test wallet.
 
 Testing: 53 contract tests (including the lender vault's deposits, withdrawals, default write-downs and owner limits), 2 tests against a fork of live QIE mainnet (a real QIEDEX swap inside the oracle bound, and linking a real .qie name), and 90 backend tests.
 
 ## Challenges we ran into
 
 - **Gas that lied.** QIE's gas estimates undercount calls that go through a forwarder. Early relayed transactions ran out of gas while the app showed success. Now every path sets an explicit gas limit, and any revert shows up as an error the user can see.
-- **Fake customers.** It took a few rounds to land on a rule I could defend: cash builds reputation, only settled money builds borrowing power.
+- **Fake customers.** It took a few rounds to land on a rule I could defend: cash builds reputation, only money paid in crypto builds borrowing power.
 - **Staying free.** My first host stopped after a trial, so I folded the API into the Vercel app with a free Postgres database and a daily cron. Nothing in Veriga needs a paid server.
 - **Counting traction honestly.** The traction page leaves out every team and test wallet, merchants paying themselves, and payments from one registered shop to another.
 

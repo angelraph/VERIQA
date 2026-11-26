@@ -16,7 +16,7 @@ From sales to a record. Every confirmed sale becomes a receipt on the blockchain
 
 A book nobody at the counter can change. The first shops found a reason to use Veriga every day, long before any loan. Every sale is confirmed by the customer's own phone and locked on the chain, so nobody can quietly rub out a sale or change an amount later. The owner sees exactly what was taken today, sale by sale. One shop owner, Silverglam, put it better than I could: "no more fear of my workers stealing from me." Emeka gets the same thing. The record that will one day get him a loan already protects his till today.
 
-Honest about what counts. A dishonest seller could invent fake customers, so Veriga treats evidence carefully. Cash sales confirmed by customers build Emeka's reputation, but they are capped per customer and they never raise how much he can borrow. Only money that really moved on-chain does that. A lender can see exactly which is which.
+Honest about what counts. A dishonest seller could invent fake customers, so Veriga treats evidence carefully. Cash sales confirmed by customers build Emeka's reputation, but they are capped per customer and they never raise how much he can borrow. Only sales paid in crypto do that, even though both kinds are recorded on QIE mainnet. A lender can see exactly which is which.
 
 When his customers have crypto. Some customers do hold crypto. They connect QIE Wallet in one tap (Veriga switches the wallet to QIE Mainnet, or offers to add the network) and pay in QUSDC, or in QIE that swaps to QUSDC through QIEDEX inside the same payment, price-checked against the QIE Oracle. That money goes straight into Emeka's own wallet. Veriga never holds it. His dashboard shows it arriving, and he can send it to his QIE Wallet, to family, or to an exchange to turn it into naira. His phone signs the transfer, so only he can move it.
 
@@ -38,7 +38,7 @@ Proof that it's real
 
 I ran Emeka's whole story on mainnet with real money. A shop opened with no wallet and no gas. A customer confirmed a cash sale from their own phone. Another paid in QUSDC. Scores were checkpointed on-chain. A shop borrowed 0.60 QUSDC, and its very next sale paid back 0.618, fee included, automatically in the same transaction. Then its limit doubled. After that, the pool was handed to the lender vault and the team gave up control for good. The amounts are tiny on purpose, so the full cycle could be proven for almost nothing. Every transaction is linked in the README.
 
-Since launch, shops run by people outside the team have opened on Veriga and recorded real customer-confirmed sales. Eight of them have sent feedback so far. Silverglam called it "a game changer for my business". Others said "very fast and swift", "really nice and user explanatory" and "well built". The traction page counts them live and leaves out every team and test wallet.
+Since launch, shops run by people outside the team have opened on Veriga and recorded real customer-confirmed sales. By 26 November, 24 shops had signed up and 17 of them were recording sales: 26 sales worth $334.85, confirmed by 22 different customers, 4 of whom came back to buy again. Every one of those sales is on QIE mainnet. Ten shop owners have sent feedback so far. Silverglam called it "a game changer for my business". Others said "very fast and swift", "really nice and user explanatory" and "keeps my daily sales organized & saves me from headaches". The traction page counts them live and leaves out every team and test wallet.
 
 Behind it: 53 contract tests, 2 tests against a copy of live QIE mainnet, and 90 backend tests.
 
@@ -46,7 +46,7 @@ Challenges we ran into
 
 The gas that lied. QIE's gas estimates come in low for calls that go through a forwarder, so early transactions quietly ran out of gas while the app showed success. Now every action sets its own gas limit, and any failure shows up clearly to the user.
 
-Fake customers. It took a few rounds to find a rule I could defend: cash builds reputation, and only settled money builds borrowing power.
+Fake customers. It took a few rounds to find a rule I could defend: cash builds reputation, and only money paid in crypto builds borrowing power.
 
 Keeping it free. My first host shut down after a trial, so I folded everything into one free deployment. Nothing in Veriga needs a paid server.
 
