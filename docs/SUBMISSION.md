@@ -59,7 +59,7 @@ I ran the whole loop with real money. A shop opened with no wallet and no gas. A
 
 Since launch, shops run by people outside the team have opened on Veriga and recorded real customer-confirmed sales. By 27 November, 30 shops had signed up and 25 of them had made sales: 35 sales in total, worth $398.20, confirmed by 30 different customers, 5 of whom came back to buy again. Every one of those sales is on QIE mainnet. Ten shop owners have sent feedback so far. Silverglam called it "a game changer for my business", and others said "very fast and swift", "really nice and user explanatory" and "keeps my daily sales organized & saves me from headaches". The traction page counts them live and leaves out every team and test wallet.
 
-Testing: 53 contract tests (including the lender vault's deposits, withdrawals, default write-downs and owner limits), 2 tests against a fork of live QIE mainnet (a real QIEDEX swap inside the oracle bound, and linking a real .qie name), and 90 backend tests.
+Testing: 77 contract tests (including the lender vault's deposits, withdrawals, default write-downs and owner limits), 2 tests against a fork of live QIE mainnet (a real QIEDEX swap inside the oracle bound, and linking a real .qie name), and 90 backend tests.
 
 ## Challenges we ran into
 
