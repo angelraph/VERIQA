@@ -40,7 +40,7 @@ I ran Emeka's whole story on mainnet with real money. A shop opened with no wall
 
 Since launch, shops run by people outside the team have opened on Veriga and recorded real customer-confirmed sales. By 27 November, 30 shops had signed up and 25 of them had made sales: 35 sales in total, worth $398.20, confirmed by 30 different customers, 5 of whom came back to buy again. Every one of those sales is on QIE mainnet. Ten shop owners have sent feedback so far. Silverglam called it "a game changer for my business". Others said "very fast and swift", "really nice and user explanatory" and "keeps my daily sales organized & saves me from headaches". The traction page counts them live and leaves out every team and test wallet.
 
-Behind it: 53 contract tests, 2 tests against a copy of live QIE mainnet, and 90 backend tests.
+Behind it: 77 contract tests, 2 tests against a copy of live QIE mainnet, and 90 backend tests.
 
 Challenges we ran into
 
